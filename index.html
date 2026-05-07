@@ -3,391 +3,461 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UE5 物理灯光 (PBL) 完整参考</title>
+<title>UE5 PBL 完整参考 v3</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
-  :root {
-    --bg-deep: #08090e;
-    --bg-card: rgba(255,255,255,0.03);
-    --bg-card-hover: rgba(255,255,255,0.06);
-    --border: rgba(255,255,255,0.07);
-    --text-primary: #e4e4e7;
-    --text-secondary: #a1a1aa;
-    --text-muted: #52525b;
-    --accent-blue: #60a5fa;
-    --accent-amber: #f59e0b;
-    --accent-green: #34d399;
-    --accent-purple: #a78bfa;
-    --accent-red: #f87171;
-    --accent-cyan: #22d3ee;
-    --glow-blue: rgba(96,165,250,0.08);
-    --glow-amber: rgba(245,158,11,0.08);
-    --glow-green: rgba(52,211,153,0.08);
-    --glow-purple: rgba(167,139,250,0.08);
-    --glow-red: rgba(248,113,113,0.08);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html { scroll-behavior:smooth; }
-  body {
-    font-family:'Noto Sans SC',-apple-system,BlinkMacSystemFont,sans-serif;
-    background:var(--bg-deep); color:var(--text-primary);
-    line-height:1.6; min-height:100vh; overflow-x:hidden;
-  }
-  body::before {
-    content:''; position:fixed; inset:0;
-    background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(96,165,250,0.04) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 80% 90%,rgba(167,139,250,0.03) 0%,transparent 60%);
-    pointer-events:none; z-index:0;
-  }
-  .container { max-width:1080px; margin:0 auto; padding:40px 24px 60px; position:relative; z-index:1; }
-  .header { margin-bottom:40px; }
-  .header h1 {
-    font-size:32px; font-weight:800; letter-spacing:-0.02em;
-    background:linear-gradient(135deg,#60a5fa 0%,#a78bfa 50%,#f0abfc 100%);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:10px;
-  }
-  .header p { font-size:14px; color:var(--text-secondary); max-width:720px; line-height:1.7; }
-  .tab-nav {
-    display:flex; gap:2px; margin-bottom:32px;
-    background:rgba(255,255,255,0.03); border-radius:12px; padding:4px;
-    border:1px solid var(--border); overflow-x:auto;
-  }
-  .tab-btn {
-    padding:10px 22px; border:none; background:transparent;
-    color:var(--text-muted); font-size:13px; font-weight:600;
-    font-family:inherit; cursor:pointer; border-radius:9px;
-    transition:all 0.2s; white-space:nowrap;
-  }
-  .tab-btn:hover { color:var(--text-secondary); background:rgba(255,255,255,0.04); }
-  .tab-btn.active { color:var(--accent-blue); background:rgba(96,165,250,0.1); box-shadow:0 0 20px rgba(96,165,250,0.08); }
-  .tab-panel { display:none; animation:fadeUp 0.35s ease; }
-  .tab-panel.active { display:block; }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-  .scenario-bar { display:flex; gap:8px; margin-bottom:24px; overflow-x:auto; padding-bottom:8px; -webkit-overflow-scrolling:touch; }
-  .scenario-btn {
-    display:flex; flex-direction:column; align-items:center; gap:6px;
-    padding:12px 16px; border-radius:12px; border:2px solid transparent;
-    background:var(--bg-card); cursor:pointer; transition:all 0.2s;
-    min-width:88px; flex-shrink:0; font-family:inherit;
-  }
-  .scenario-btn:hover { background:var(--bg-card-hover); border-color:rgba(255,255,255,0.1); }
-  .scenario-btn.active { border-color:var(--accent-blue); background:rgba(96,165,250,0.08); }
-  .scenario-btn .icon { font-size:28px; line-height:1; }
-  .scenario-btn .label { font-size:11px; font-weight:600; color:var(--text-muted); text-align:center; line-height:1.3; }
-  .scenario-btn.active .label { color:var(--accent-blue); }
-  .scenario-hero { border-radius:16px; padding:24px; margin-bottom:20px; position:relative; overflow:hidden; }
-  .scenario-hero::after { content:''; position:absolute; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px); }
-  .scenario-hero-content { position:relative; z-index:1; }
-  .scenario-hero h2 { font-size:24px; font-weight:800; color:#fff; margin-bottom:4px; }
-  .scenario-hero p { font-size:14px; color:rgba(255,255,255,0.8); }
-  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  @media(max-width:680px){ .grid-2{grid-template-columns:1fr;} }
-  .info-card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:18px; transition:border-color 0.2s; }
-  .info-card:hover { border-color:rgba(255,255,255,0.12); }
-  .info-card-title { font-size:13px; font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
-  .info-card-title.amber { color:var(--accent-amber); }
-  .info-card-title.blue { color:var(--accent-blue); }
-  .info-card-title.green { color:var(--accent-green); }
-  .info-card-title.purple { color:var(--accent-purple); }
-  .data-row { margin-bottom:14px; }
-  .data-row:last-child { margin-bottom:0; }
-  .data-label { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); font-weight:700; margin-bottom:2px; }
-  .data-value { font-size:15px; font-weight:600; color:var(--text-primary); line-height:1.4; }
-  .data-sub { font-size:12px; color:var(--text-secondary); margin-top:2px; line-height:1.5; }
-  .tips-box { margin-top:20px; padding:16px 18px; border-radius:12px; font-size:13px; line-height:1.7; }
-  .tips-box.blue { background:var(--glow-blue); border:1px solid rgba(96,165,250,0.15); color:var(--text-secondary); }
-  .tips-box.amber { background:var(--glow-amber); border:1px solid rgba(245,158,11,0.15); color:var(--text-secondary); }
-  .tips-box.green { background:var(--glow-green); border:1px solid rgba(52,211,153,0.15); color:var(--text-secondary); }
-  .tips-box.purple { background:var(--glow-purple); border:1px solid rgba(167,139,250,0.15); color:var(--text-secondary); }
-  .tips-box.red { background:var(--glow-red); border:1px solid rgba(248,113,113,0.15); color:var(--text-secondary); }
-  .tips-box-title { font-weight:700; margin-bottom:6px; font-size:13px; }
-  .tips-box-title.blue { color:var(--accent-blue); }
-  .tips-box-title.amber { color:var(--accent-amber); }
-  .tips-box-title.green { color:var(--accent-green); }
-  .tips-box-title.purple { color:var(--accent-purple); }
-  .tips-box-title.red { color:var(--accent-red); }
-  .badge { display:inline-block; padding:2px 8px; border-radius:5px; font-size:11px; font-weight:600; letter-spacing:0.02em; }
-  .badge.amber { background:rgba(245,158,11,0.12); color:var(--accent-amber); border:1px solid rgba(245,158,11,0.25); }
-  .badge.green { background:rgba(52,211,153,0.12); color:var(--accent-green); border:1px solid rgba(52,211,153,0.25); }
-  .badge.blue { background:rgba(96,165,250,0.12); color:var(--accent-blue); border:1px solid rgba(96,165,250,0.25); }
-  .badge.purple { background:rgba(167,139,250,0.12); color:var(--accent-purple); border:1px solid rgba(167,139,250,0.25); }
-  .table-wrap { overflow-x:auto; border-radius:12px; border:1px solid var(--border); }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  thead tr { background:rgba(255,255,255,0.04); }
-  th { padding:12px 14px; text-align:left; font-weight:700; color:var(--text-muted); font-size:10px; text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--border); }
-  td { padding:10px 14px; border-bottom:1px solid rgba(255,255,255,0.03); color:var(--text-secondary); }
-  tr:nth-child(even) { background:rgba(255,255,255,0.015); }
-  td:first-child { color:var(--text-primary); font-weight:600; }
-  .formula-card { padding:20px; border-radius:12px; background:var(--bg-card); border:1px solid var(--border); margin-bottom:16px; }
-  .formula-card h3 { font-size:15px; font-weight:700; margin-bottom:10px; color:var(--text-primary); }
-  .formula-code { font-family:'JetBrains Mono',monospace; font-size:17px; font-weight:600; color:var(--accent-blue); padding:12px 16px; background:var(--glow-blue); border-radius:10px; margin-bottom:10px; letter-spacing:-0.01em; overflow-x:auto; }
-  .formula-vars { font-size:12px; color:var(--text-secondary); margin-bottom:4px; }
-  .formula-example { font-size:12px; color:var(--accent-green); }
-  .ev-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-  @media(max-width:500px){ .ev-grid{grid-template-columns:1fr;} }
-  .ev-item { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,0.03); border-radius:8px; font-size:12px; }
-  .ev-item .ev-val { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--accent-purple); }
-  .ev-item .ev-desc { color:var(--text-secondary); }
-  .workflow-step { display:flex; gap:16px; align-items:flex-start; margin-bottom:22px; position:relative; }
-  .workflow-step:not(:last-child)::after { content:''; position:absolute; left:18px; top:40px; bottom:-14px; width:2px; background:linear-gradient(180deg,rgba(96,165,250,0.3),rgba(167,139,250,0.1)); }
-  .step-num { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#8b5cf6); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#fff; flex-shrink:0; box-shadow:0 0 16px rgba(96,165,250,0.2); position:relative; z-index:1; }
-  .step-content { flex:1; padding-top:2px; }
-  .step-content h4 { font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
-  .step-content p { font-size:13px; color:var(--text-secondary); line-height:1.7; }
-  .relation-text { font-size:13px; color:var(--text-secondary); line-height:2; }
-  .relation-text strong { color:var(--text-primary); }
-  .section-title { font-size:18px; font-weight:700; color:var(--text-primary); margin-bottom:6px; }
-  .section-desc { font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px; }
-  .footer { margin-top:48px; padding-top:16px; border-top:1px solid var(--border); text-align:center; font-size:11px; color:var(--text-muted); line-height:1.6; }
-  input[type=number] { width:100%; padding:8px 10px; background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:8px; color:var(--text-primary); font-size:14px; font-family:inherit; outline:none; }
-  input[type=number]:focus { border-color:var(--accent-blue); }
-  ::-webkit-scrollbar { width:6px; height:6px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:3px; }
-  ::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.2); }
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+:root{--bg:#08090e;--c1:rgba(255,255,255,0.03);--c2:rgba(255,255,255,0.055);--bd:rgba(255,255,255,0.07);--t1:#e4e4e7;--t2:#a1a1aa;--t3:#52525b;--blue:#60a5fa;--amber:#f59e0b;--green:#34d399;--purple:#a78bfa;--red:#f87171;--cyan:#22d3ee;--pink:#f0abfc;--sky:#38bdf8;--sand:#d97706;--snow:#94a3b8;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:var(--bg);color:var(--t1);line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(96,165,250,0.04),transparent 60%),radial-gradient(ellipse 60% 50% at 80% 90%,rgba(167,139,250,0.03),transparent 60%);pointer-events:none;z-index:0}
+.W{max-width:1120px;margin:0 auto;padding:36px 20px 56px;position:relative;z-index:1}
+h1{font-size:28px;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,#60a5fa,#a78bfa,#f0abfc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.sub{font-size:13px;color:var(--t2);max-width:760px;line-height:1.7;margin-bottom:32px}
+/* tabs */
+.TN{display:flex;gap:2px;margin-bottom:26px;background:var(--c1);border-radius:11px;padding:3px;border:1px solid var(--bd);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.TB{padding:8px 16px;border:0;background:0;color:var(--t3);font-size:11.5px;font-weight:600;font-family:inherit;cursor:pointer;border-radius:8px;transition:.2s;white-space:nowrap}
+.TB:hover{color:var(--t2);background:rgba(255,255,255,.04)}
+.TB.on{color:var(--blue);background:rgba(96,165,250,.1)}
+.TP{display:none;animation:fu .28s ease}.TP.on{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* scenario bar */
+.SB{display:flex;gap:6px;margin-bottom:20px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+.SI{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 12px;border-radius:10px;border:2px solid transparent;background:var(--c1);cursor:pointer;transition:.2s;min-width:76px;flex-shrink:0;font-family:inherit}
+.SI:hover{background:var(--c2);border-color:rgba(255,255,255,.1)}
+.SI.on{border-color:var(--blue);background:rgba(96,165,250,.08)}
+.SI .ic{font-size:22px;line-height:1}
+.SI .lb{font-size:9px;font-weight:600;color:var(--t3);text-align:center;line-height:1.25}
+.SI.on .lb{color:var(--blue)}
+/* category labels in scenario bar */
+.SCAT{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;padding:9px 6px;flex-shrink:0;align-self:center;opacity:.5}
+/* hero */
+.H{border-radius:13px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden}
+.H::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(4px)}
+.HC{position:relative;z-index:1}
+.H h2{font-size:20px;font-weight:800;color:#fff;margin-bottom:2px}
+.H p{font-size:12px;color:rgba(255,255,255,.8)}
+/* section divider inside detail */
+.SD{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--bd)}
+/* grid */
+.G2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.G3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:720px){.G2,.G3{grid-template-columns:1fr}}
+.CD{background:var(--c1);border:1px solid var(--bd);border-radius:11px;padding:14px;transition:border-color .2s}
+.CD:hover{border-color:rgba(255,255,255,.12)}
+.CT{font-size:11px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.CT.am{color:var(--amber)}.CT.bl{color:var(--blue)}.CT.gn{color:var(--green)}.CT.pu{color:var(--purple)}.CT.rd{color:var(--red)}.CT.cy{color:var(--cyan)}.CT.pk{color:var(--pink)}.CT.sk{color:var(--sky)}.CT.sa{color:var(--sand)}.CT.sn{color:var(--snow)}
+.DR{margin-bottom:10px}.DR:last-child{margin-bottom:0}
+.DL{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);font-weight:700;margin-bottom:1px}
+.DV{font-size:13px;font-weight:600;color:var(--t1);line-height:1.35}
+.DS{font-size:10.5px;color:var(--t2);margin-top:1px;line-height:1.45}
+/* tip box */
+.BX{margin-top:16px;padding:13px 15px;border-radius:10px;font-size:11.5px;line-height:1.7}
+.BX.bl{background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.14);color:var(--t2)}
+.BX.am{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.14);color:var(--t2)}
+.BX.gn{background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.14);color:var(--t2)}
+.BX.pu{background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.14);color:var(--t2)}
+.BX.rd{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.14);color:var(--t2)}
+.BT{font-weight:700;margin-bottom:4px;font-size:11.5px}
+.BT.bl{color:var(--blue)}.BT.am{color:var(--amber)}.BT.gn{color:var(--green)}.BT.pu{color:var(--purple)}.BT.rd{color:var(--red)}.BT.cy{color:var(--cyan)}
+/* table inside card */
+.TW{overflow-x:auto;border-radius:9px;border:1px solid var(--bd)}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead tr{background:rgba(255,255,255,.04)}
+th{padding:8px 10px;text-align:left;font-weight:700;color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--bd)}
+td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--t2)}
+tr:nth-child(even){background:rgba(255,255,255,.015)}
+td:first-child{color:var(--t1);font-weight:600}
+/* badge */
+.BG{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:600}
+.BG.am{background:rgba(245,158,11,.12);color:var(--amber)}.BG.gn{background:rgba(52,211,153,.12);color:var(--green)}.BG.bl{background:rgba(96,165,250,.12);color:var(--blue)}.BG.pu{background:rgba(167,139,250,.12);color:var(--purple)}.BG.rd{background:rgba(248,113,113,.12);color:var(--red)}
+/* formula */
+.FC{padding:16px;border-radius:10px;background:var(--c1);border:1px solid var(--bd);margin-bottom:12px}
+.FC h3{font-size:13px;font-weight:700;margin-bottom:7px}
+.FO{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--blue);padding:9px 12px;background:rgba(96,165,250,.07);border-radius:8px;margin-bottom:7px;overflow-x:auto}
+.FV{font-size:10.5px;color:var(--t2);margin-bottom:2px}
+.FE{font-size:10.5px;color:var(--green)}
+.EG{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+@media(max-width:480px){.EG{grid-template-columns:1fr}}
+.EI{display:flex;justify-content:space-between;padding:6px 9px;background:rgba(255,255,255,.03);border-radius:6px;font-size:10.5px}
+.EI .ev{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--purple)}
+/* workflow */
+.WS{display:flex;gap:13px;align-items:flex-start;margin-bottom:18px;position:relative}
+.WS:not(:last-child)::after{content:'';position:absolute;left:15px;top:36px;bottom:-10px;width:2px;background:linear-gradient(180deg,rgba(96,165,250,.3),rgba(167,139,250,.1))}
+.WN{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 0 12px rgba(96,165,250,.2);position:relative;z-index:1}
+.WC{flex:1;padding-top:1px}
+.WC h4{font-size:13px;font-weight:700;margin-bottom:2px}
+.WC p{font-size:11.5px;color:var(--t2);line-height:1.65}
+.RT{font-size:11.5px;color:var(--t2);line-height:1.9}
+.RT strong{color:var(--t1)}
+input[type=number]{width:100%;padding:6px 8px;background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:6px;color:var(--t1);font-size:12px;font-family:inherit;outline:0}
+input:focus{border-color:var(--blue)}
+.FT{margin-top:40px;padding-top:12px;border-top:1px solid var(--bd);text-align:center;font-size:9.5px;color:var(--t3);line-height:1.6}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:0}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <h1>UE5 物理灯光 (PBL) 完整参考</h1>
-    <p>基于真实世界照度数据的 Unreal Engine 5 物理灯光工作流参考手册。涵盖不同时段的 Lux / EV100 / 色温参数及其相互关系。</p>
-  </div>
-  <div class="tab-nav">
-    <button class="tab-btn active" data-tab="scenarios">时间场景</button>
-    <button class="tab-btn" data-tab="units">灯光单位</button>
-    <button class="tab-btn" data-tab="formulas">公式换算</button>
-    <button class="tab-btn" data-tab="indoor">室内光源</button>
-    <button class="tab-btn" data-tab="workflow">工作流</button>
-  </div>
+<div class="W">
+<h1>UE5 物理灯光 (PBL) 完整参考 v3</h1>
+<p class="sub">所有参数（Directional Light / Sky Light / Sky Atmosphere / 雾效 / 反射 / 后处理）统一整合到每个场景中。选择时段或天气条件，一次查看全部相关数值。</p>
 
-  <!-- TAB: scenarios -->
-  <div id="tab-scenarios" class="tab-panel active">
-    <div class="scenario-bar" id="scenarioBar"></div>
-    <div id="scenarioDetail"></div>
-  </div>
+<div class="TN" id="tnav"></div>
 
-  <!-- TAB: units -->
-  <div id="tab-units" class="tab-panel">
-    <div class="tips-box amber" style="margin-bottom:24px;">
-      <div class="tips-box-title amber">核心概念</div>
-      UE5中不同类型的灯光使用不同的物理单位。Directional Light 使用 <span class="badge amber">Lux</span>（照度），Point/Spot/Rect Light 可选 <span class="badge green">Candela</span> 或 <span class="badge blue">Lumen</span>，Emissive 和 SkyLight 使用 <span class="badge purple">cd/m²</span>（亮度）。
-    </div>
-    <div class="section-title">UE5 灯光 Actor 与物理单位对照</div>
-    <div class="section-desc">每种灯光类型在UE5中的默认值和PBL推荐值范围</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Actor</th><th>单位</th><th>含义</th><th>UE默认值</th><th>PBL范围</th></tr></thead>
-        <tbody>
-          <tr><td>Directional Light</td><td>Lux (lx)</td><td>直接法线照度，模拟太阳/月亮</td><td>10 lux</td><td>0.25 – 120,000</td></tr>
-          <tr><td>Point Light</td><td>cd / lm / 无单位</td><td>点光源，模拟灯泡等</td><td>8 cd</td><td>取决于灯具 (60W≈800lm)</td></tr>
-          <tr><td>Spot Light</td><td>cd / lm / 无单位</td><td>聚光灯，有锥角</td><td>8 cd</td><td>取决于灯具和角度</td></tr>
-          <tr><td>Rect Light</td><td>cd / lm / 无单位</td><td>面光源，模拟屏幕/窗户</td><td>8 cd</td><td>取决于面积和用途</td></tr>
-          <tr><td>Sky Light</td><td>cd/m²（乘数）</td><td>天空球亮度，填充阴影</td><td>1.0</td><td>0.01 – 1.5</td></tr>
-          <tr><td>Emissive Material</td><td>cd/m²</td><td>自发光表面亮度</td><td>—</td><td>蜡烛~7 / 屏幕~200 / 太阳~1.6×10⁹</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="info-card" style="margin-top:20px;">
-      <div class="section-title" style="font-size:15px;">单位之间的关系</div>
-      <div class="relation-text" style="margin-top:8px;">
-        <strong>Lux → Candela：</strong>Lux衡量到达表面的光照强度（照度），Candela衡量光源在某方向上的发光强度。在UE中，当Point Light用Candela定义时，其亮度不受锥角影响；用Lumen定义时则会受影响。<br>
-        <strong>Lumen → Candela：</strong>对于各向同性点光源，Candela = Lumens / (4π)。对于Spot Light，Candela = Lumens / (2π × (1 - cos(半角)))。<br>
-        <strong>实际意义：</strong>太阳约120,000 lux，60W灯泡约800 lumen（≈64 candela），两者差距约60–1000倍。这就是为什么用任意值打光时添加几盏灯就会破坏平衡。
-      </div>
-    </div>
-  </div>
+<!-- TAB: 场景 -->
+<div id="t-scenes" class="TP on">
+  <div class="SB" id="sbar"></div>
+  <div id="sdet"></div>
+</div>
+<!-- TAB: 反射 -->
+<div id="t-refl" class="TP"><div id="reflC"></div></div>
+<!-- TAB: 单位 -->
+<div id="t-units" class="TP"><div id="unitsC"></div></div>
+<!-- TAB: 公式 -->
+<div id="t-formula" class="TP"><div id="formulaC"></div></div>
+<!-- TAB: 工作流 -->
+<div id="t-flow" class="TP"><div id="flowC"></div></div>
 
-  <!-- TAB: formulas -->
-  <div id="tab-formulas" class="tab-panel">
-    <div class="section-desc">PBL的核心在于让灯光的Lux/Lumen值和相机的曝光（EV100）在数学上一致。</div>
-    <div class="formula-card"><h3>EV100 公式</h3><div class="formula-code">EV100 = log₂( N² / t × 100 / S )</div><div class="formula-vars">N = 光圈值，t = 快门时间(秒)，S = ISO</div><div class="formula-example">例: f/8, 1/125s, ISO100 → EV100 ≈ 13</div></div>
-    <div class="formula-card"><h3>Lux → EV100</h3><div class="formula-code">EV100 = log₂( E × S / C )</div><div class="formula-vars">E = 照度(lux)，S = ISO(通常100)，C = 入射光常数(250)</div><div class="formula-example">例: 100,000 lux → EV100 ≈ 15.3</div></div>
-    <div class="formula-card"><h3>曝光计算（UE内部）</h3><div class="formula-code">Exposure = 1 / ( 1.2 × 2^EV100 )</div><div class="formula-vars">UE内部用此公式将EV100转为亮度缩放系数</div><div class="formula-example">例: EV100=15 → Exposure ≈ 0.0000254</div></div>
-    <div class="formula-card"><h3>单位换算</h3><div class="formula-code">1 lux = 1 lm/m² ｜ 1 cd = 1 lm/sr</div><div class="formula-vars">lux(照度) / lumen(光通量) / candela(光强)</div><div class="formula-example">UE中 Directional Light 用 lux，Point/Spot 用 cd 或 lm</div></div>
-    <div class="tips-box purple" style="margin-top:24px;">
-      <div class="tips-box-title purple">EV100 速查表</div>
-      <div class="ev-grid" style="margin-top:10px;">
-        <div class="ev-item"><span class="ev-val">EV -6 ~ -2</span><span class="ev-desc">月光场景</span></div>
-        <div class="ev-item"><span class="ev-val">EV -2 ~ 4</span><span class="ev-desc">夜间人工照明</span></div>
-        <div class="ev-item"><span class="ev-val">EV 4 ~ 8</span><span class="ev-desc">室内照明</span></div>
-        <div class="ev-item"><span class="ev-val">EV 9 ~ 11</span><span class="ev-desc">日出 / 日落</span></div>
-        <div class="ev-item"><span class="ev-val">EV 12 ~ 14</span><span class="ev-desc">阴天 / Golden Hour</span></div>
-        <div class="ev-item"><span class="ev-val">EV 14 ~ 16</span><span class="ev-desc">晴天正午</span></div>
-      </div>
-    </div>
-    <div class="info-card" style="margin-top:24px;">
-      <div class="section-title" style="font-size:15px;">🧮 EV100 互动计算器</div>
-      <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-        <div><label class="data-label">光圈 (f/)</label><input id="calcAperture" type="number" value="8" step="0.1" min="0.7" oninput="calcEV()"></div>
-        <div><label class="data-label">快门 (1/x 秒)</label><input id="calcShutter" type="number" value="125" step="1" min="1" oninput="calcEV()"></div>
-        <div><label class="data-label">ISO</label><input id="calcISO" type="number" value="100" step="100" min="50" oninput="calcEV()"></div>
-      </div>
-      <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div><label class="data-label">照度 Lux（输入可反算EV）</label><input id="calcLux" type="number" value="100000" step="1000" min="0" oninput="calcFromLux()"></div>
-        <div style="display:flex;align-items:flex-end;">
-          <div id="calcResult" style="padding:8px 14px;background:var(--glow-blue);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--accent-blue);width:100%;text-align:center;border:1px solid rgba(96,165,250,0.2);">EV100 = 13.0</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB: indoor -->
-  <div id="tab-indoor" class="tab-panel">
-    <div class="section-title">常见室内光源参考值</div>
-    <div class="section-desc">在UE5中创建室内场景时，使用这些值作为 Point / Spot Light 的起始参数</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>光源</th><th>光通量 (lm)</th><th>光强 (cd)</th><th>色温</th><th>EV100</th></tr></thead>
-        <tbody>
-          <tr><td>蜡烛</td><td>12 lm</td><td>~1 cd</td><td>1800K</td><td>1 – 4</td></tr>
-          <tr><td>台灯 (40W)</td><td>450 lm</td><td>~36 cd</td><td>2700K</td><td>5 – 7</td></tr>
-          <tr><td>吊灯 (60W)</td><td>800 lm</td><td>~64 cd</td><td>2700–3000K</td><td>7 – 8</td></tr>
-          <tr><td>办公荧光灯</td><td>3,200 lm</td><td>~255 cd</td><td>4000–5000K</td><td>8 – 9</td></tr>
-          <tr><td>射灯/聚光灯</td><td>500–1,000 lm</td><td>角度相关</td><td>3000–5000K</td><td>7 – 10</td></tr>
-          <tr><td>日光灯管</td><td>1,800 lm</td><td>~143 cd</td><td>4100K</td><td>7 – 9</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="tips-box green" style="margin-top:24px;">
-      <div class="tips-box-title green">室内外混合场景提示</div>
-      室外阳光可达120,000 lux，室内灯光仅300–500 lux，差距约300倍。需依靠 <strong style="color:var(--text-primary)">Local Exposure</strong> 来平衡窗内外亮度差异。UE5的 Post Process Volume 中有 Local Exposure Contrast Scale 和 Detail Strength 参数帮助解决。
-    </div>
-    <div class="info-card" style="margin-top:24px;">
-      <div class="section-title" style="font-size:15px;">色温参考色带</div>
-      <div style="margin-top:12px;height:40px;border-radius:10px;overflow:hidden;display:flex;">
-        <div style="flex:1;background:#ff8a2e;" title="1800K"></div>
-        <div style="flex:1;background:#ffab4e;" title="2700K"></div>
-        <div style="flex:1;background:#ffc573;" title="3000K"></div>
-        <div style="flex:1;background:#ffd9a0;" title="3500K"></div>
-        <div style="flex:1;background:#fff1d6;" title="4100K"></div>
-        <div style="flex:1;background:#fff8ed;" title="5000K"></div>
-        <div style="flex:1;background:#fff9f4;" title="5500K"></div>
-        <div style="flex:1;background:#f0f4ff;" title="6500K"></div>
-        <div style="flex:1;background:#d6e4ff;" title="7500K"></div>
-        <div style="flex:1;background:#b8d0ff;" title="10000K+"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:6px;padding:0 2px;">
-        <span>1800K</span><span>2700K</span><span>3500K</span><span>4100K</span><span>5500K</span><span>6500K</span><span>10000K</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-secondary);padding:0 2px;">
-        <span>蜡烛</span><span>灯泡</span><span>暖荧光</span><span>自然白</span><span>正午</span><span>阴天</span><span>蓝天</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB: workflow -->
-  <div id="tab-workflow" class="tab-panel">
-    <div class="section-desc">核心思路：<strong style="color:var(--text-primary)">先确定曝光，再设置光源，最后调节氛围。</strong></div>
-    <div style="margin-bottom:8px;">
-      <div class="workflow-step"><div class="step-num">1</div><div class="step-content"><h4>项目设置</h4><p>确保 <strong>Extend Default Luminance Range</strong> 已开启（UE5.1+ 默认开启）。</p></div></div>
-      <div class="workflow-step"><div class="step-num">2</div><div class="step-content"><h4>Post Process Volume 曝光</h4><p>使用 <strong>Manual</strong> 计量模式。锁定 Min/Max EV100 为同一值（正午≈15，室内≈7）。</p></div></div>
-      <div class="workflow-step"><div class="step-num">3</div><div class="step-content"><h4>Directional Light（主光源）</h4><p>正午=100,000–120,000 lux，Golden Hour=20,000–40,000，阴天=5,000–10,000。调角度、色温，开启 Atmosphere Sun Light。</p></div></div>
-      <div class="workflow-step"><div class="step-num">4</div><div class="step-content"><h4>Sky Light（环境光）</h4><p>开启 <strong>Real Time Capture</strong>，Intensity≈1.0。它决定阴影明暗和Key/Fill比。</p></div></div>
-      <div class="workflow-step"><div class="step-num">5</div><div class="step-content"><h4>Sky Atmosphere / HDRI</h4><p>方案A: Sky Atmosphere（最物理正确）。方案B: HDRI天空球（更大艺术控制）。</p></div></div>
-      <div class="workflow-step"><div class="step-num">6</div><div class="step-content"><h4>室内/人工光源</h4><p>使用真实Lumen/Candela值。开启 Inverse Squared Falloff。优先用色温而非直接调色。</p></div></div>
-      <div class="workflow-step"><div class="step-num">7</div><div class="step-content"><h4>对比度和层次</h4><p>用 HDR 可视化模式检查亮度。微调 SkyLight Intensity 控制对比。加 Height Fog 增加层次。</p></div></div>
-      <div class="workflow-step"><div class="step-num">8</div><div class="step-content"><h4>后处理调色</h4><p>Tone Mapper（推荐ACES）、Bloom、Vignette、Color Grading。室内外混合用 Local Exposure。</p></div></div>
-    </div>
-    <div class="tips-box red" style="margin-top:8px;">
-      <div class="tips-box-title red">⚠️ 常见陷阱</div>
-      <strong>1.</strong> 忘记设曝光 → 100,000 lux + 默认EV = 全白<br>
-      <strong>2.</strong> Auto Exposure干扰 → 用Manual模式锁定<br>
-      <strong>3.</strong> Lux已含天空贡献 → Directional Light值应略低于参考总Lux<br>
-      <strong>4.</strong> 夜间过暗 → 月光0.25 lux可适当"作弊"提亮至1–5 lux<br>
-      <strong>5.</strong> Indirect Lighting在高Lux下可能无效
-    </div>
-    <div class="tips-box blue" style="margin-top:16px;">
-      <div class="tips-box-title blue">🔗 参数相互影响关系</div>
-      <div class="relation-text">
-        <strong>Directional Light (Lux)</strong> → 场景直接照明绝对亮度 → 决定 EV100 选择<br>
-        <strong>EV100</strong> → 相机"看到"多少光 → 通过光圈/快门/ISO间接设定<br>
-        <strong>SkyLight</strong> → 填充阴影 → 其与Directional Light的比例 = 场景对比度<br>
-        <strong>Exposure Compensation</strong> → EV100基础上±微调 → 不改变物理值<br>
-        <strong>Bloom / Fog</strong> → 依赖正确HDR亮度值才有物理正确效果<br><br>
-        <strong style="color:var(--accent-cyan)">光源决定物理亮度，曝光决定画面亮度，后处理决定画面氛围。</strong>光源强度×2 = EV100+1档，画面亮度不变但Bloom和HDR表现改变。
-      </div>
-    </div>
-  </div>
-
-  <div class="footer">数据来源：Epic Games官方文档、Wikipedia EV表、PBL Database (Arthur Tasquin)、Magnopus PBL指南、Silicon Studio Enlighten文档<br>数值为参考范围，实际使用需根据艺术方向调整</div>
+<div class="FT">Epic Games文档 / Wikipedia EV / PBL Database (Arthur Tasquin) / Magnopus / Silicon Studio / NVIDIA GPU Gems<br>数值为参考范围，实际需根据艺术方向调整</div>
 </div>
 
 <script>
-const TIMES=[
-  {id:"noon",icon:"☀️",label:"正午",sub:"Midday",desc:"太阳直射，最强光照",grad:"linear-gradient(180deg,#87CEEB 0%,#f0e68c 100%)",sun:{lux:"100,000 – 120,000",note:"晴天直射阳光+天空贡献总和",temp:"5500 – 6500K",tempD:"纯白偏冷，色温中性",ang:"70° – 90°（取决于纬度）",shadow:"影子最短最硬，对比度16:1（4档）"},sky:{int:"高",lum:"8,000 – 12,000 cd/m²",col:"纯蓝，饱和度高",sli:"1.0 (Real Time Capture)"},exp:{ev:"14 – 16",typ:"15",ap:"f/11 – f/16",sh:"1/125 – 1/250",iso:"100",comp:"0"},con:{r:"16:1（4档）",d:"亮部与暗部差异极大"},pp:{bl:"低 (0.3–0.5)",bt:"1.0",lf:"可选，强度低",fog:"薄雾/无雾"},tips:"正午最\"简单\"。Directional Light=120,000 lux，EV100≈15。SkyLight对阴影填充至关重要。"},
-  {id:"golden",icon:"🌅",label:"黄金时刻",sub:"Golden Hour",desc:"日出后/日落前1小时",grad:"linear-gradient(180deg,#87CEEB 0%,#FFA500 60%,#FF6347 100%)",sun:{lux:"10,000 – 40,000",note:"阳光穿过更厚大气层",temp:"3000 – 4000K",tempD:"暖橙到金黄",ang:"10° – 30°",shadow:"影子拉长柔和，8:1（3档）"},sky:{int:"中等",lum:"2,000 – 6,000 cd/m²",col:"天顶偏蓝，地平线暖橙粉色过渡",sli:"0.8 – 1.0"},exp:{ev:"12 – 14",typ:"13",ap:"f/8 – f/11",sh:"1/60 – 1/125",iso:"100 – 200",comp:"0 至 +0.5"},con:{r:"8:1（3档）",d:"亮暗适中，画面温暖"},pp:{bl:"中等 (0.5–0.8)",bt:"0.8",lf:"增加温暖氛围",fog:"Height Fog略提高"},tips:"将Directional Light旋转至低角度（Pitch -10°到-30°），lux约20,000–40,000，色温3500K。开启Light Shaft（God Rays）。"},
-  {id:"sunrise",icon:"🌄",label:"清晨",sub:"Sunrise",desc:"太阳刚升起的瞬间",grad:"linear-gradient(180deg,#1a1a2e 0%,#e94560 40%,#FFA500 80%,#FFD700 100%)",sun:{lux:"400 – 1,000",note:"大气散射极强",temp:"2000 – 3000K",tempD:"深橙到红色",ang:"0° – 10°",shadow:"影子极长柔软，4:1（2档）"},sky:{int:"较低",lum:"500 – 2,000 cd/m²",col:"地平线暖红/橙，天顶深蓝紫",sli:"0.5 – 0.8"},exp:{ev:"9 – 12",typ:"11",ap:"f/4 – f/8",sh:"1/30 – 1/60",iso:"200 – 400",comp:"+0.5 至 +1.0"},con:{r:"4:1（2档）",d:"柔和光影过渡"},pp:{bl:"较高 (0.8–1.2)",bt:"0.6",lf:"推荐，增梦幻感",fog:"Height Fog配合暖色"},tips:"难点是天空颜色过渡。Sky Atmosphere的多重散射可自动处理。手动设置时SkyLight偏暖紫。"},
-  {id:"sunset",icon:"🌇",label:"黄昏",sub:"Sunset",desc:"太阳落入地平线",grad:"linear-gradient(180deg,#2d1b69 0%,#e94560 30%,#ff6b35 60%,#ffa62b 100%)",sun:{lux:"400 – 1,000",note:"比Sunrise更多气溶胶",temp:"1800 – 2500K",tempD:"深红到橙红，比清晨更暖",ang:"0° – 5°",shadow:"极长，偏蓝紫色"},sky:{int:"较低",lum:"500 – 3,000 cd/m²",col:"丰富红橙紫渐变",sli:"0.4 – 0.7"},exp:{ev:"9 – 12",typ:"11",ap:"f/4 – f/8",sh:"1/30 – 1/60",iso:"200 – 400",comp:"+0.5 至 +1.5"},con:{r:"4:1（2档）",d:"低对比，色彩丰富"},pp:{bl:"高 (1.0–1.5)",bt:"0.5",lf:"强烈推荐",fog:"较浓Height Fog+暖色"},tips:"色彩比清晨更饱和。提高Sky Atmosphere的Mie Scattering Scale增强效果。Volumetric Cloud最有表现力。"},
-  {id:"twilight",icon:"🌆",label:"暮光",sub:"Twilight",desc:"日落后到天黑（Blue Hour）",grad:"linear-gradient(180deg,#0c0c3a 0%,#2d1b69 30%,#e94560 70%,#ff8c69 100%)",sun:{lux:"1 – 400",note:"太阳在地平线以下",temp:"7000 – 12000K",tempD:"冷蓝到深紫",ang:"太阳 -1° 到 -18°",shadow:"几乎无影，极度漫射"},sky:{int:"低",lum:"100 – 1,000 cd/m²",col:"天顶深蓝，地平线残留橙红",sli:"0.2 – 0.5"},exp:{ev:"5 – 9",typ:"7",ap:"f/2.8 – f/4",sh:"1/8 – 1/30",iso:"400 – 1600",comp:"+1.0 至 +2.0"},con:{r:"2:1（1档）",d:"极低对比，色调统一"},pp:{bl:"中等 (0.5–0.8)",bt:"0.3",lf:"可选",fog:"大气感关键时段"},tips:"渲染城市夜景的经典时段。关闭或极大降低Directional Light，靠SkyLight和人工光源照明。"},
-  {id:"night",icon:"🌙",label:"夜晚",sub:"Night",desc:"月光或无月夜晚",grad:"linear-gradient(180deg,#000011 0%,#0a0a2e 50%,#1a1a4e 100%)",sun:{lux:"0.001 – 0.27（满月）",note:"满月≈0.25 lux，无月夜0.0001 lux",temp:"4100K（月光）",tempD:"冷白偏蓝",ang:"取决于月亮位置",shadow:"满月有微弱阴影"},sky:{int:"极低",lum:"0.001 – 0.01 cd/m²",col:"深蓝到黑色",sli:"0.01 – 0.1"},exp:{ev:"-6 – -2",typ:"-3",ap:"f/1.4 – f/2.8",sh:"1/4 – 数秒",iso:"1600 – 6400",comp:"+2.0 至 +4.0"},con:{r:"极低",d:"人眼杆状细胞为主，几乎无色彩"},pp:{bl:"高 (1.0–2.0)",bt:"0.2",lf:"人工光源处推荐",fog:"夜雾+蓝色调"},tips:"最难场景。月光与正午差50万倍！Directional Light(月光)=0.1–0.5 lux，EV100≈-3。可艺术化提亮10–50倍。"},
-  {id:"overcast",icon:"☁️",label:"阴天",sub:"Overcast",desc:"厚云层覆盖，漫射光为主",grad:"linear-gradient(180deg,#9e9e9e 0%,#bdbdbd 50%,#e0e0e0 100%)",sun:{lux:"1,000 – 20,000",note:"取决于云层厚度",temp:"6500 – 7500K",tempD:"冷白偏蓝",ang:"N/A（漫射无方向）",shadow:"几乎无影或极柔和"},sky:{int:"中等（均匀）",lum:"2,000 – 5,000 cd/m²",col:"灰白色均匀",sli:"1.0 – 1.5（主光源）"},exp:{ev:"12 – 14",typ:"13",ap:"f/5.6 – f/8",sh:"1/60 – 1/125",iso:"100 – 200",comp:"0 至 +0.5"},con:{r:"2:1 – 4:1",d:"低对比，平坦均匀"},pp:{bl:"低 (0.2–0.4)",bt:"1.0",lf:"不适用",fog:"Height Fog增加层次"},tips:"SkyLight成为主光源。Directional Light=1,000–10,000 lux，增大Source Soft Angle（2–5°）。理想人像/产品展示光照。"}
+// ═══════════════════════════════════════════
+// UNIFIED SCENARIO DATA
+// ═══════════════════════════════════════════
+const S=[
+// ── TIME OF DAY ──
+{cat:'时段',ic:'☀️',lb:'正午',sub:'Midday',ds:'太阳直射，最强光照',gr:'linear-gradient(180deg,#87CEEB,#f0e68c)',
+ dir:{lux:'100,000–120,000',n:'晴天直射+天空',tp:'5500–6500K',td:'纯白偏冷',ag:'70°–90°',sh:'最短最硬 16:1(4档)',soft:'0.5°(真实太阳)',shaft:'可选'},
+ sky:{i:'1.0',l:'8,000–12,000 cd/m²',c:'跟随大气(纯蓝)',rtc:'开启',lh:'自动'},
+ atmo:{rs:'1.0',rc:'默认蓝(0.175,0.409,1.0)',rh:'8km',ms:'1.0',mc:'白(1,1,1)',mh:'1.2km',ma:'0.8(强前向)',mab:'默认',multi:'1.0',ga:'0.2,0.2,0.2',abs:'1.0'},
+ fog:{d:'0.001–0.005',fo:'2.0–3.0',col:'天空色淡蓝',dist:'500–1000m',vf:'可选',ve:'0.5–1.0',vsd:'0.8–0.9',va:'1.0',second:'关闭'},
+ refl:{note:'标准Roughness表现，金属/玻璃清晰反射',wet:'N/A',rough:'材质原始值'},
+ exp:{ev:'14–16',t:'15',ap:'f/11–f/16',sh:'1/125–1/250',iso:'100',co:'0'},
+ pp:{bl:'0.3–0.5',bt:'1.0',lf:'可选低',vig:'0.1–0.2',sat:'1.0',cg:'中性',extra:''},
+ tip:'最简单的PBL场景。DirLight=120k lux，EV100≈15。正午SkyLight对阴影填充是Key/Fill比的关键。Sky Atmosphere默认值就是晴天正午。'},
+
+{cat:'时段',ic:'🌅',lb:'黄金时刻',sub:'Golden Hour',ds:'日出后/日落前1h，电影感最佳',gr:'linear-gradient(180deg,#87CEEB,#FFA500 60%,#FF6347)',
+ dir:{lux:'10,000–40,000',n:'穿过厚大气层',tp:'3000–4000K',td:'暖橙到金黄',ag:'10°–30°',sh:'拉长柔和 8:1(3档)',soft:'0.5–1.0°',shaft:'推荐(God Rays)'},
+ sky:{i:'0.8–1.0',l:'2,000–6,000 cd/m²',c:'跟随大气(顶蓝底暖)',rtc:'开启',lh:'自动'},
+ atmo:{rs:'1.0–1.5',rc:'默认',rh:'8km',ms:'2.0–4.0(增加光晕)',mc:'白偏暖(1,0.95,0.85)',mh:'1.2km',ma:'0.85–0.95(极强→大光晕)',mab:'偏暖(1,0.9,0.7)',multi:'1.0',ga:'0.2–0.3',abs:'1.0–1.5(增加→更红)'},
+ fog:{d:'0.005–0.02',fo:'0.8–1.5',col:'暖金/橙',dist:'200–500m',vf:'推荐',ve:'1.0–1.5',vsd:'0.7–0.85',va:'1.0',second:'可选偏暖'},
+ refl:{note:'暖色反射，金属表面偏金',wet:'N/A',rough:'材质原始值'},
+ exp:{ev:'12–14',t:'13',ap:'f/8–f/11',sh:'1/60–1/125',iso:'100–200',co:'0~+0.5'},
+ pp:{bl:'0.5–0.8',bt:'0.8',lf:'推荐(暖氛围)',vig:'0.2–0.3',sat:'1.0–1.1',cg:'Midtones偏暖',extra:'Light Shaft Bloom开启'},
+ tip:'DirLight低角Pitch(-10°到-30°)，Mie Anisotropy提至0.9产生大太阳光晕。开Light Shaft Bloom + Volumetric Fog产生God Rays。'},
+
+{cat:'时段',ic:'🌄',lb:'清晨',sub:'Sunrise',ds:'太阳刚升起',gr:'linear-gradient(180deg,#1a1a2e,#e94560 40%,#FFA500 80%,#FFD700)',
+ dir:{lux:'400–1,000',n:'大气散射极强',tp:'2000–3000K',td:'深橙到红',ag:'0°–10°',sh:'极长柔软 4:1(2档)',soft:'1.0–2.0°',shaft:'推荐'},
+ sky:{i:'0.5–0.8',l:'500–2,000 cd/m²',c:'跟随大气(暖紫)',rtc:'开启',lh:'自动'},
+ atmo:{rs:'1.0',rc:'默认(自动处理)',rh:'8km',ms:'1.5–3.0',mc:'白偏暖',mh:'1.2km',ma:'0.8–0.9',mab:'默认',multi:'1.0',ga:'0.2',abs:'1.0'},
+ fog:{d:'0.01–0.03',fo:'0.5–1.0',col:'暖粉/淡橙',dist:'100–300m',vf:'推荐(晨雾)',ve:'1.0–2.0',vsd:'0.6–0.8',va:'1.0',second:'推荐(低层晨雾)'},
+ refl:{note:'暖色反射，水面反射朝霞色',wet:'可选晨露(Roughness降0.05)',rough:'材质原始或微降'},
+ exp:{ev:'9–12',t:'11',ap:'f/4–f/8',sh:'1/30–1/60',iso:'200–400',co:'+0.5~+1.0'},
+ pp:{bl:'0.8–1.2',bt:'0.6',lf:'梦幻感',vig:'0.2–0.3',sat:'1.0',cg:'Shadows偏紫蓝',extra:''},
+ tip:'Sky Atmosphere自动处理天空过渡(底暖红顶冷蓝)。低层晨雾用Second Fog Layer(低Falloff+低Height)。手动调时SkyLight色调偏暖紫。'},
+
+{cat:'时段',ic:'🌇',lb:'黄昏',sub:'Sunset',ds:'太阳落入地平线',gr:'linear-gradient(180deg,#2d1b69,#e94560 30%,#ff6b35 60%,#ffa62b)',
+ dir:{lux:'400–1,000',n:'更多气溶胶→更红',tp:'1800–2500K',td:'深红到橙红',ag:'0°–5°',sh:'极长偏蓝紫',soft:'1.0–2.0°',shaft:'强烈推荐'},
+ sky:{i:'0.4–0.7',l:'500–3,000 cd/m²',c:'跟随大气(暖红紫)',rtc:'开启',lh:'自动'},
+ atmo:{rs:'1.0–1.5',rc:'默认',rh:'8km',ms:'3.0–5.0(比清晨更高)',mc:'偏暖(1,0.9,0.7)',mh:'1.2km',ma:'0.85–0.95',mab:'偏暖(1,0.8,0.5)',multi:'1.0',ga:'0.2–0.3',abs:'1.0–1.5'},
+ fog:{d:'0.01–0.05',fo:'0.5–1.0',col:'暖橙/红',dist:'100–300m',vf:'推荐',ve:'1.5–2.5',vsd:'0.7–0.85',va:'1.0',second:'推荐偏红'},
+ refl:{note:'强暖色反射，水面呈现金红色',wet:'N/A',rough:'材质原始值'},
+ exp:{ev:'9–12',t:'11',ap:'f/4–f/8',sh:'1/30–1/60',iso:'200–400',co:'+0.5~+1.5'},
+ pp:{bl:'1.0–1.5',bt:'0.5',lf:'强烈推荐',vig:'0.3–0.4',sat:'1.1–1.2',cg:'Gain偏暖橙',extra:'Volumetric Cloud最有表现力'},
+ tip:'比清晨更饱和(更多气溶胶)。Mie Scale 3-5 + Anisotropy 0.9+。Sky Atmosphere的Mie Absorption偏暖可增强红色。Volumetric Cloud此时最美。'},
+
+{cat:'时段',ic:'🌆',lb:'暮光',sub:'Twilight / Blue Hour',ds:'日落后天完全黑之前',gr:'linear-gradient(180deg,#0c0c3a,#2d1b69 30%,#e94560 70%,#ff8c69)',
+ dir:{lux:'1–400',n:'太阳在地平线以下',tp:'7000–12000K',td:'冷蓝深紫',ag:'太阳-1°到-18°',sh:'几乎无影',soft:'5°+',shaft:'关闭'},
+ sky:{i:'0.2–0.5',l:'100–1,000 cd/m²',c:'冷蓝偏紫',rtc:'开启',lh:'深蓝灰'},
+ atmo:{rs:'1.0',rc:'默认',rh:'8km',ms:'1.0',mc:'默认',mh:'1.2km',ma:'0.8',mab:'默认',multi:'1.0–1.5(补偿暗度)',ga:'0.15',abs:'1.0'},
+ fog:{d:'0.005–0.02',fo:'0.5–1.0',col:'冷蓝灰',dist:'200–500m',vf:'推荐',ve:'1.0–1.5',vsd:'0.5–0.7',va:'1.0',second:'可选'},
+ refl:{note:'人工灯光成为主要反射来源',wet:'N/A',rough:'材质原始值'},
+ exp:{ev:'5–9',t:'7',ap:'f/2.8–f/4',sh:'1/8–1/30',iso:'400–1600',co:'+1~+2'},
+ pp:{bl:'0.5–0.8',bt:'0.3',lf:'可选',vig:'0.3–0.4',sat:'0.8–0.9',cg:'Shadows偏深蓝',extra:'人工光Bloom突出'},
+ tip:'城市夜景经典时段——天空有余光但灯已亮。DirLight极低或关闭，靠SkyLight+人工光源(Point/Spot)照明。人工灯具用真实lm值(路灯3000-5000lm，霓虹灯自发光cd/m²)。'},
+
+{cat:'时段',ic:'🌙',lb:'夜晚',sub:'Moonlit Night',ds:'满月或无月',gr:'linear-gradient(180deg,#000011,#0a0a2e 50%,#1a1a4e)',
+ dir:{lux:'0.1–0.5(月光，可艺术化提亮)',n:'真实满月≈0.25lux',tp:'4100K(月光)',td:'冷白偏蓝(人眼感知)',ag:'月亮位置',sh:'满月有微弱阴影',soft:'0.5°',shaft:'可选(月光柱)'},
+ sky:{i:'0.01–0.1',l:'0.001–0.01 cd/m²',c:'深蓝/黑',rtc:'开启',lh:'黑色'},
+ atmo:{rs:'1.0',rc:'默认',rh:'8km',ms:'1.0',mc:'默认',mh:'1.2km',ma:'0.8',mab:'默认',multi:'1.0',ga:'0.05(暗地面)',abs:'1.0'},
+ fog:{d:'0.002–0.01',fo:'0.5–1.5',col:'深蓝灰',dist:'300–800m',vf:'推荐(月光散射)',ve:'0.5–1.0',vsd:'0.3–0.5',va:'1.0',second:'可选(低层夜雾)'},
+ refl:{note:'人工光源成为主要反射来源，月光下水面有冷蓝反射',wet:'N/A',rough:'材质原始值'},
+ exp:{ev:'-6~-2',t:'-3',ap:'f/1.4–f/2.8',sh:'1/4–数秒',iso:'1600–6400',co:'+2~+4'},
+ pp:{bl:'1.0–2.0',bt:'0.2',lf:'人工光处推荐',vig:'0.3–0.5',sat:'0.3–0.6(低饱和模拟暗视觉)',cg:'整体偏冷蓝，Shadows深蓝',extra:'Color Grading Saturation降低模拟杆状细胞视觉'},
+ tip:'最难场景。真实月光太暗(0.25lux)，建议艺术化提至0.5-5 lux。EV≈-3。Light Color可设为淡蓝(R:0.7 G:0.8 B:1.0)模拟"月光蓝"。用Niagara萤火虫/灯笼粒子增加趣味光源。'},
+
+// ── WEATHER ──
+{cat:'天气',ic:'☁️',lb:'阴天',sub:'Overcast',ds:'厚云覆盖，漫射光为主',gr:'linear-gradient(180deg,#9e9e9e,#bdbdbd 50%,#e0e0e0)',
+ dir:{lux:'1,000–20,000',n:'取决于云层厚度',tp:'6500–7500K',td:'冷白偏蓝',ag:'N/A(漫射)',sh:'极柔或无影',soft:'2.0–5.0°',shaft:'关闭'},
+ sky:{i:'1.0–1.5(成为主光源)',l:'2,000–5,000 cd/m²',c:'灰白均匀',rtc:'开启',lh:'灰色(0.3,0.3,0.32)'},
+ atmo:{rs:'0–0.5(大幅降低蓝天)',rc:'影响小',rh:'8km',ms:'5.0–10.0(高密度)',mc:'灰白(0.9,0.9,0.95)',mh:'1.5–3.0km',ma:'0.0–0.3(均匀散射)',mab:'灰(0.85,0.85,0.9)',multi:'1.5–2.0(补偿)',ga:'0.15–0.2(湿地面)',abs:'0–0.5(减臭氧色)'},
+ fog:{d:'0.01–0.05',fo:'0.3–0.8',col:'冷灰白',dist:'200–500m',vf:'推荐',ve:'1.5–2.5',vsd:'0.4–0.6',va:'1.0',second:'可选'},
+ refl:{note:'反射内容偏灰白平坦',wet:'可选',rough:'材质原始值'},
+ exp:{ev:'12–14',t:'13',ap:'f/5.6–f/8',sh:'1/60–1/125',iso:'100–200',co:'0~+0.5'},
+ pp:{bl:'0.2–0.4',bt:'1.0',lf:'不适用',vig:'0.1–0.2',sat:'0.85–0.95',cg:'微偏冷',extra:'理想人像/产品展示光照'},
+ tip:'关键：Rayleigh Scale降至0-0.5 + Mie Scale升至5-10 + Mie Anisotropy降至0。SkyLight成主光源，DirLight仅提供微弱方向感。Source Soft Angle 2-5°。'},
+
+{cat:'天气',ic:'🌧️',lb:'雨天',sub:'Rainy',ds:'中等降雨，灰暗潮湿',gr:'linear-gradient(180deg,#475569,#94a3b8,#64748b)',
+ dir:{lux:'1,000–8,000',n:'厚云+雨层遮挡',tp:'6500–8000K',td:'冷灰蓝',ag:'N/A',sh:'极柔无影',soft:'3.0–5.0°',shaft:'关闭'},
+ sky:{i:'0.6–1.0',l:'1,000–3,000 cd/m²',c:'暗灰蓝',rtc:'开启',lh:'暗灰(0.15,0.15,0.18)'},
+ atmo:{rs:'0–0.3',rc:'默认',rh:'8km',ms:'6.0–12.0',mc:'灰(0.85,0.85,0.9)',mh:'2.0–3.0km',ma:'0.1–0.3',mab:'冷灰',multi:'1.5–2.0',ga:'0.1(湿暗地面)',abs:'0–0.3'},
+ fog:{d:'0.02–0.1',fo:'0.3–0.8',col:'冷灰蓝(偏暗)',dist:'100–300m',vf:'推荐',ve:'2.0–4.0',vsd:'0.3–0.5',va:'1.0(水粒子高反射)',second:'推荐(density 0.01,falloff 0.2)'},
+ refl:{note:'★核心：湿润表面镜面反射',wet:'全局Roughness降至0.05–0.15',rough:'Material Parameter Collection控制全局Wetness'},
+ exp:{ev:'10–13',t:'12',ap:'f/4–f/8',sh:'1/30–1/125',iso:'200–400',co:'0~+0.5'},
+ pp:{bl:'0.4–0.6',bt:'0.8',lf:'不适用',vig:'0.3–0.4',sat:'0.7–0.85(降饱和)',cg:'Shadows偏冷蓝绿',extra:'Chromatic Aberration 0.2-0.5(模拟水汽)'},
+ tip:'雨天视觉核心=湿润反射。用Material Parameter Collection统一降低Roughness(0.05-0.15)。积水区用Planar Reflection Actor。雨滴粒子Niagara+碰撞溅射。路灯在湿地面的反射是雨景灵魂。'},
+
+{cat:'极端',ic:'⛈️',lb:'雷暴',sub:'Thunderstorm',ds:'暴雨+闪电+强风',gr:'linear-gradient(180deg,#0f172a,#1e293b,#475569,#f0f9ff)',
+ dir:{lux:'500–5,000(基础) / 闪电80,000+',n:'厚云极度遮挡+闪电脉冲',tp:'7000–9000K(基础) / 6500K(闪电)',td:'极冷灰 / 闪电纯白',ag:'N/A',sh:'基础无影 / 闪电瞬间硬影',soft:'3–5°(基础) / 0.5°(闪电)',shaft:'闪电时开(0.1s)'},
+ sky:{i:'0.3–0.6',l:'500–2,000 cd/m²',c:'冷灰暗蓝',rtc:'开启',lh:'深灰(0.08,0.08,0.1)'},
+ atmo:{rs:'0–0.3(几乎无蓝天)',rc:'默认',rh:'8km',ms:'8.0–15.0(极暗天空)',mc:'暗灰(0.7,0.7,0.75)',mh:'2.0–4.0km',ma:'0.0–0.2(均匀)',mab:'暗灰',multi:'2.0–3.0(补偿)',ga:'0.08(暗湿地面)',abs:'0.5'},
+ fog:{d:'0.05–0.2',fo:'0.2–0.5',col:'深灰偏紫/绿(暴风标志色)',dist:'50–200m',vf:'是',ve:'3.0–5.0',vsd:'0.15–0.3',va:'0.9–1.0',second:'density 0.02,falloff 0.15'},
+ refl:{note:'湿地面强反射+闪电照亮的瞬间反射极戏剧化',wet:'全局Roughness 0.02–0.1(暴雨更湿)',rough:'极低Roughness=镜面'},
+ exp:{ev:'10–12(基础) / 闪电瞬间骤降至6–8',t:'11',ap:'f/4–f/8',sh:'1/30–1/60',iso:'200–800',co:'0(基础) / 闪电时自动'},
+ pp:{bl:'0.8–1.2(基础) / 3–5(闪电)',bt:'0.5',lf:'闪电时自动',vig:'0.4–0.6',sat:'0.6–0.8(降饱和)',cg:'降饱和+Shadows偏蓝+闪电瞬间提亮',extra:'Chromatic Aberration 0.5–1.0(闪电)；闪电方案：A.DirLight Timeline脉冲(0→80k→0/0.1s) B.额外PointLight(50k-200k lm) C.PPV EV骤降2-3档'},
+ tip:'核心节奏：暗基调(低Lux+高Mie)→闪电脉冲(瞬间高Lux+低EV+高Bloom)→恢复暗调。用Sequencer关键帧驱动DirLight Intensity曲线配合音效。Niagara雨粒子+闪电bolt粒子。Volumetric Fog的Emissive在闪电时瞬间提高0.05-0.2模拟整片天空亮起。'},
+
+{cat:'极端',ic:'🏜️',lb:'沙暴',sub:'Sandstorm',ds:'沙尘漫天，橙色笼罩',gr:'linear-gradient(180deg,#451a03,#78350f,#b45309,#fbbf24)',
+ dir:{lux:'5,000–30,000',n:'沙尘遮挡但仍有光穿透',tp:'3000–4500K',td:'被沙尘滤成暖橙',ag:'模糊(沙尘扩散)',sh:'极柔无清晰影',soft:'2.0–4.0°',shaft:'开启(光穿沙柱) 0.5–1.0'},
+ sky:{i:'0.6–1.0',l:'1,000–4,000 cd/m²',c:'暖橙灰(R:0.7 G:0.5 B:0.3)',rtc:'开启',lh:'暖棕(0.4,0.25,0.1)'},
+ atmo:{rs:'0.2–0.5(大幅降蓝)',rc:'默认',rh:'8km',ms:'10.0–20.0(★极高！核心参数)',mc:'沙色(1.0,0.7,0.3)',mh:'2.0–5.0km(沙尘升很高)',ma:'0.6–0.8(中强前向)',mab:'暖吸收(1.0,0.6,0.2)',multi:'1.5–2.5',ga:'沙漠(0.6,0.4,0.2)',abs:'0.5–1.0'},
+ fog:{d:'0.1–0.5(★高密度)',fo:'0.1–0.4(沙尘全高度)',col:'深橙土黄(R:0.8 G:0.5 B:0.2)',dist:'20–100m(能见度极低)',vf:'是',ve:'4.0–8.0(★极高遮蔽)',vsd:'0.5–0.7(前向散射明显)',va:'0.7–0.85(沙尘吸收部分光)',second:'开启,偏红,更浓近地面'},
+ refl:{note:'反射被沙尘Fog严重遮蔽，远处几乎不可见',wet:'N/A',rough:'所有表面被沙尘覆盖Roughness可提高'},
+ exp:{ev:'12–14',t:'13',ap:'f/5.6–f/8',sh:'1/60–1/125',iso:'100–200',co:'0~+0.5'},
+ pp:{bl:'0.8–1.5',bt:'0.6',lf:'太阳方向推荐',vig:'0.3–0.5',sat:'0.6–0.8(降饱和增灰)',cg:'Gain偏橙(R:1.2 G:0.9 B:0.6)，White Balance 4000-5000K',extra:'DoF近清远糊增强沙尘感；Niagara大量沙尘sprite(200-500个)+Wind Force 500-2000+噪声贴图；地面沙流粒子层spawn在0-50cm'},
+ tip:'沙暴的灵魂：★橙色统治一切——Fog/SkyAtmo/SkyLight/PP全偏暖橙。Mie Scale 10-20是最关键参数。Niagara粒子+Light Function(噪声Cloud遮罩DirLight)创造移动沙墙。远处可用Volumetric Cloud橙色自发光材质模拟沙暴墙。'},
+
+{cat:'极端',ic:'❄️',lb:'暴风雪',sub:'Blizzard',ds:'大雪+强风+白茫茫',gr:'linear-gradient(180deg,#e2e8f0,#f1f5f9,#fff,#cbd5e1)',
+ dir:{lux:'2,000–10,000',n:'厚云但雪反射补偿',tp:'7500–10000K',td:'极冷蓝白',ag:'模糊(雪遮蔽)',sh:'无清晰影',soft:'3.0–5.0°',shaft:'关闭'},
+ sky:{i:'1.0–1.5(★高！雪面强反射)',l:'2,000–6,000 cd/m²',c:'冷蓝白(R:0.75 G:0.8 B:0.95)',rtc:'开启',lh:'灰白(0.5,0.52,0.58)'},
+ atmo:{rs:'0.2–0.5',rc:'默认',rh:'8km',ms:'8.0–15.0(暴风雪密集)',mc:'白(1,1,1)',mh:'2.0–4.0km',ma:'0.2–0.4(半均匀)',mab:'白',multi:'2.0–2.5',ga:'雪地(0.8,0.85,0.9)★高反射',abs:'0.3'},
+ fog:{d:'0.05–0.3',fo:'0.2–0.6',col:'冷灰白(R:0.85 G:0.88 B:0.95)',dist:'30–150m',vf:'是',ve:'3.0–6.0',vsd:'0.3–0.5',va:'1.0(冰晶高反射)',second:'推荐(近地飞雪)'},
+ refl:{note:'雪地高反射率(Albedo 0.8-0.9)使环境偏亮',wet:'雪覆盖表面Roughness高(0.6-0.9)',rough:'冰面Roughness低(0.05-0.2)'},
+ exp:{ev:'12–14',t:'13',ap:'f/5.6–f/8',sh:'1/60–1/125',iso:'100–200',co:'+0.5~+1.0(雪地提亮)'},
+ pp:{bl:'1.0–2.0(白茫茫感)',bt:'0.5',lf:'不适用',vig:'0.2–0.4',sat:'0.6–0.8(低饱和)',cg:'偏冷蓝：Shadows/Midtones偏蓝',extra:'Niagara雪花粒子+强Wind Force+噪声运动；Exposure Comp +0.5-1.0(雪地需提亮)'},
+ tip:'高亮度+低对比度+冷蓝调。SkyLight Intensity提高(雪反射大量光)。Ground Albedo 0.8-0.9(雪地)是让Sky Atmosphere看起来正确的关键。Niagara雪花+风力模块+碰撞积雪。'},
 ];
 
-let activeScenario=0;
+// ═══════════════════════════════════════════
+// TABS & RENDERING
+// ═══════════════════════════════════════════
+const TABS=[
+  {id:'scenes',label:'🎬 场景全参数'},
+  {id:'refl',label:'🪞 反射系统'},
+  {id:'units',label:'💡 灯光单位'},
+  {id:'formula',label:'🔢 公式换算'},
+  {id:'flow',label:'📋 工作流'},
+];
 
-function renderBar(){
-  document.getElementById('scenarioBar').innerHTML=TIMES.map((t,i)=>`<button class="scenario-btn ${i===activeScenario?'active':''}" onclick="setScenario(${i})"><span class="icon">${t.icon}</span><span class="label">${t.label}<br><span style="font-size:9px;font-weight:400;opacity:0.7">${t.sub}</span></span></button>`).join('');
-}
-
-function renderDetail(){
-  const t=TIMES[activeScenario];
-  document.getElementById('scenarioDetail').innerHTML=`
-    <div class="scenario-hero" style="background:${t.grad}"><div class="scenario-hero-content"><h2>${t.icon} ${t.label} ${t.sub}</h2><p>${t.desc}</p></div></div>
-    <div class="grid-2">
-      <div class="info-card"><div class="info-card-title amber">☀️ Directional Light</div>
-        <div class="data-row"><div class="data-label">强度 (Lux)</div><div class="data-value">${t.sun.lux}</div><div class="data-sub">${t.sun.note}</div></div>
-        <div class="data-row"><div class="data-label">色温</div><div class="data-value">${t.sun.temp}</div><div class="data-sub">${t.sun.tempD}</div></div>
-        <div class="data-row"><div class="data-label">角度</div><div class="data-value">${t.sun.ang}</div></div>
-        <div class="data-row"><div class="data-label">阴影特征</div><div class="data-value" style="font-size:13px;font-weight:400">${t.sun.shadow}</div></div>
-      </div>
-      <div class="info-card"><div class="info-card-title blue">🌤 Sky Light</div>
-        <div class="data-row"><div class="data-label">亮度</div><div class="data-value">${t.sky.int}</div><div class="data-sub">Luminance: ${t.sky.lum}</div></div>
-        <div class="data-row"><div class="data-label">颜色</div><div class="data-value" style="font-size:13px;font-weight:400">${t.sky.col}</div></div>
-        <div class="data-row"><div class="data-label">SkyLight Intensity</div><div class="data-value">${t.sky.sli}</div></div>
-      </div>
-      <div class="info-card"><div class="info-card-title green">📷 曝光 (PPV)</div>
-        <div class="data-row"><div class="data-label">EV100</div><div class="data-value">${t.exp.ev}</div><div class="data-sub">推荐: ${t.exp.typ}</div></div>
-        <div class="data-row"><div class="data-label">光圈</div><div class="data-value">${t.exp.ap}</div></div>
-        <div class="data-row"><div class="data-label">快门</div><div class="data-value">${t.exp.sh}</div></div>
-        <div class="data-row"><div class="data-label">ISO</div><div class="data-value">${t.exp.iso}</div></div>
-        <div class="data-row"><div class="data-label">曝光补偿</div><div class="data-value">${t.exp.comp}</div></div>
-      </div>
-      <div class="info-card"><div class="info-card-title purple">🎨 后处理 & 氛围</div>
-        <div class="data-row"><div class="data-label">对比度</div><div class="data-value">${t.con.r}</div><div class="data-sub">${t.con.d}</div></div>
-        <div class="data-row"><div class="data-label">Bloom</div><div class="data-value">${t.pp.bl}</div></div>
-        <div class="data-row"><div class="data-label">Bloom阈值</div><div class="data-value">${t.pp.bt}</div></div>
-        <div class="data-row"><div class="data-label">Lens Flare</div><div class="data-value">${t.pp.lf}</div></div>
-        <div class="data-row"><div class="data-label">雾效</div><div class="data-value" style="font-size:13px;font-weight:400">${t.pp.fog}</div></div>
-      </div>
-    </div>
-    <div class="tips-box blue"><div class="tips-box-title blue">💡 实践建议</div>${t.tips}</div>`;
-}
-
-function setScenario(i){activeScenario=i;renderBar();renderDetail();}
-
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+function initTabs(){
+  document.getElementById('tnav').innerHTML=TABS.map(t=>`<button class="TB ${t.id==='scenes'?'on':''}" data-t="${t.id}">${t.label}</button>`).join('');
+  document.querySelectorAll('.TB').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.TB').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.TP').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');document.getElementById('t-'+b.dataset.t).classList.add('on');
   });
-});
-
-function calcEV(){
-  const N=parseFloat(document.getElementById('calcAperture').value)||8;
-  const t=1/(parseFloat(document.getElementById('calcShutter').value)||125);
-  const S=parseFloat(document.getElementById('calcISO').value)||100;
-  document.getElementById('calcResult').textContent='EV100 = '+(Math.log2(N*N/t*100/S)).toFixed(1);
-}
-function calcFromLux(){
-  const lux=parseFloat(document.getElementById('calcLux').value)||0;
-  if(lux<=0){document.getElementById('calcResult').textContent='EV100 = —';return;}
-  document.getElementById('calcResult').textContent='EV100 ≈ '+(Math.log2(lux*100/250)).toFixed(1)+' （从Lux计算）';
 }
 
-renderBar();renderDetail();calcEV();
+// ── Scenario Bar with category labels ──
+let si=0;
+function buildBar(){
+  let html='',lastCat='';
+  S.forEach((s,i)=>{
+    if(s.cat!==lastCat){html+=`<div class="SCAT">${s.cat}</div>`;lastCat=s.cat;}
+    html+=`<button class="SI ${i===si?'on':''}" onclick="setS(${i})"><span class="ic">${s.ic}</span><span class="lb">${s.lb}<br><span style="font-size:8px;font-weight:400;opacity:.65">${s.sub}</span></span></button>`;
+  });
+  document.getElementById('sbar').innerHTML=html;
+}
+
+function setS(i){si=i;buildBar();renderS();}
+
+function R(label,val,sub){return `<div class="DR"><div class="DL">${label}</div><div class="DV">${val}</div>${sub?'<div class="DS">'+sub+'</div>':''}</div>`;}
+
+function renderS(){
+  const s=S[si],d=s.dir,k=s.sky,a=s.atmo,f=s.fog,r=s.refl,e=s.exp,p=s.pp;
+  let h=`<div class="H" style="background:${s.gr}"><div class="HC"><h2>${s.ic} ${s.lb} ${s.sub}</h2><p>${s.ds}</p></div></div>`;
+
+  // ── Section 1: Light Sources ──
+  h+=`<div class="SD">光源</div><div class="G2">`;
+  h+=`<div class="CD"><div class="CT am">☀️ Directional Light</div>
+    ${R('强度 (Lux)',d.lux,d.n)}${R('色温',d.tp,d.td)}${R('角度',d.ag)}${R('阴影',d.sh)}${R('Source Soft Angle',d.soft)}${R('Light Shaft',d.shaft)}</div>`;
+  h+=`<div class="CD"><div class="CT bl">🌤 Sky Light</div>
+    ${R('Intensity',k.i,k.l)}${R('颜色',k.c)}${R('Real Time Capture',k.rtc)}${R('Lower Hemisphere',k.lh)}</div>`;
+  h+=`</div>`;
+
+  // ── Section 2: Atmosphere ──
+  h+=`<div class="SD">天空大气 Sky Atmosphere</div><div class="G2">`;
+  h+=`<div class="CD"><div class="CT sk">🔵 Rayleigh 散射（空气分子）</div>
+    ${R('Scattering Scale',a.rs)}${R('Scattering Color',a.rc)}${R('Exp. Distribution',a.rh)}</div>`;
+  h+=`<div class="CD"><div class="CT am">🟠 Mie 散射（气溶胶/尘埃）</div>
+    ${R('Scattering Scale',a.ms)}${R('Scattering Color',a.mc)}${R('Exp. Distribution',a.mh)}${R('Anisotropy (Phase)',a.ma)}${R('Absorption',a.mab)}</div>`;
+  h+=`</div><div class="G3" style="margin-top:12px">`;
+  h+=`<div class="CD"><div class="CT gn">Multi Scattering</div>${R('值',a.multi)}</div>`;
+  h+=`<div class="CD"><div class="CT gn">Ground Albedo</div>${R('值',a.ga)}</div>`;
+  h+=`<div class="CD"><div class="CT gn">Absorption Scale</div>${R('值',a.abs)}</div>`;
+  h+=`</div>`;
+
+  // ── Section 3: Fog ──
+  h+=`<div class="SD">雾效 Exponential Height Fog + Volumetric</div><div class="G2">`;
+  h+=`<div class="CD"><div class="CT gn">📊 Height Fog</div>
+    ${R('Fog Density',f.d)}${R('Height Falloff',f.fo)}${R('Inscattering Color',f.col)}${R('Start Distance',f.dist)}${R('Second Fog Layer',f.second)}</div>`;
+  h+=`<div class="CD"><div class="CT cy">🌀 Volumetric Fog</div>
+    ${R('启用',f.vf)}${R('Extinction Scale',f.ve,'光线衰减/遮蔽量')}${R('Scattering Distribution',f.vsd,'0=均匀 1=前向')}${R('Albedo',f.va,'水/冰≈1.0')}</div>`;
+  h+=`</div>`;
+
+  // ── Section 4: Reflections ──
+  h+=`<div class="SD">反射影响</div><div class="CD">`;
+  h+=`<div class="CT pu">🪞 反射特征</div>
+    ${R('总体表现',r.note)}${R('湿润/Wetness',r.wet)}${R('Roughness调整',r.rough)}`;
+  h+=`</div>`;
+
+  // ── Section 5: Exposure ──
+  h+=`<div class="SD">曝光 Post Process Volume</div><div class="G2">`;
+  h+=`<div class="CD"><div class="CT gn">📷 曝光参数</div>
+    ${R('EV100',e.ev,'推荐: '+e.t)}${R('光圈',e.ap)}${R('快门',e.sh)}${R('ISO',e.iso)}${R('曝光补偿',e.co)}</div>`;
+  h+=`<div class="CD"><div class="CT pk">🎨 后处理</div>
+    ${R('Bloom Intensity',p.bl)}${R('Bloom Threshold',p.bt)}${R('Lens Flare',p.lf)}${R('Vignette',p.vig)}${R('Saturation',p.sat)}${R('Color Grading',p.cg)}${p.extra?R('额外',p.extra):''}</div>`;
+  h+=`</div>`;
+
+  // ── Tip ──
+  h+=`<div class="BX bl"><div class="BT bl">💡 实践建议</div>${s.tip}</div>`;
+
+  document.getElementById('sdet').innerHTML=h;
+}
+
+// ── Reflections Panel ──
+function renderRefl(){
+  document.getElementById('reflC').innerHTML=`
+  <div class="G2">
+    <div class="CD"><div class="CT bl">🔷 Lumen Reflections</div>
+      ${R('启用','Project Settings → Reflection Method = Lumen')}
+      ${R('质量','SRT(Software) / HWRT(Hardware RT)','HWRT更精确更贵')}
+      ${R('MaxRoughnessToTrace','默认0.4','Roughness>0.4走Final Gather(免费)')}
+      ${R('Hit Lighting','开启=精确反射色(仅HWRT)')}
+      ${R('Screen Traces','默认开(SSR叠加)','r.Lumen.Reflections.ScreenTraces=0关闭')}
+      ${R('Foliage优化','r.Lumen.Reflections.MaxRoughnessToTraceForFoliage=0')}</div>
+    <div class="CD"><div class="CT gn">🟢 SSR + Reflection Captures</div>
+      ${R('SSR Quality','PPV → SSR → Quality 1-100')}
+      ${R('SSR Max Roughness','0.6–0.8')}
+      ${R('SSR局限','屏幕边缘/背对相机物体无法反射')}
+      ${R('Capture类型','Sphere / Box Reflection Capture')}
+      ${R('Capture用途','Lumen/SSR的最终回退层')}
+      ${R('Capture分辨率','128–512(越高越贵)')}</div>
+  </div>
+  <div class="BX pu" style="margin-top:16px"><div class="BT pu">💡 反射优化</div><div class="RT">
+    <strong>Roughness是成本核心：</strong>低Roughness(<0.4)走完整Ray Trace，高Roughness走Final Gather(便宜)<br>
+    <strong>回退层级：</strong>Lumen RT → SSR Screen Traces → Reflection Captures<br>
+    <strong>湿润材质：</strong>Material Parameter Collection控制全局Wetness，动态降Roughness<br>
+    <strong>积水：</strong>Planar Reflection Actor用于平面水体
+  </div></div>`;
+}
+
+// ── Units Panel ──
+function renderUnits(){
+  document.getElementById('unitsC').innerHTML=`
+  <div class="BX am" style="margin-bottom:18px"><div class="BT am">核心概念</div>
+    Directional Light=<span class="BG am">Lux</span> Point/Spot/Rect=<span class="BG gn">cd</span>/<span class="BG bl">lm</span> Emissive/SkyLight=<span class="BG pu">cd/m²</span></div>
+  <div class="TW"><table>
+    <thead><tr><th>Actor</th><th>单位</th><th>UE默认</th><th>PBL范围</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>Directional</td><td>Lux</td><td>10</td><td>0.25–120k</td><td>太阳/月亮</td></tr>
+      <tr><td>Point</td><td>cd/lm</td><td>8 cd</td><td>60W≈800lm</td><td>灯泡等</td></tr>
+      <tr><td>Spot</td><td>cd/lm</td><td>8 cd</td><td>角度相关</td><td>聚光灯</td></tr>
+      <tr><td>Rect</td><td>cd/lm</td><td>8 cd</td><td>面积相关</td><td>屏幕/窗</td></tr>
+      <tr><td>Sky Light</td><td>cd/m²(×)</td><td>1.0</td><td>0.01–1.5</td><td>天空填充</td></tr>
+      <tr><td>Emissive</td><td>cd/m²</td><td>—</td><td>蜡烛7/屏幕200</td><td>自发光</td></tr>
+    </tbody></table></div>
+  <div class="SD" style="margin-top:20px">常见室内光源</div>
+  <div class="TW"><table>
+    <thead><tr><th>光源</th><th>lm</th><th>cd</th><th>色温</th><th>EV100</th></tr></thead>
+    <tbody>
+      <tr><td>蜡烛</td><td>12</td><td>~1</td><td>1800K</td><td>1–4</td></tr>
+      <tr><td>台灯40W</td><td>450</td><td>~36</td><td>2700K</td><td>5–7</td></tr>
+      <tr><td>吊灯60W</td><td>800</td><td>~64</td><td>2700–3000K</td><td>7–8</td></tr>
+      <tr><td>办公荧光灯</td><td>3200</td><td>~255</td><td>4000–5000K</td><td>8–9</td></tr>
+      <tr><td>射灯</td><td>500–1000</td><td>角度相关</td><td>3000–5000K</td><td>7–10</td></tr>
+    </tbody></table></div>
+  <div class="CD" style="margin-top:16px"><div class="CT am">单位关系</div><div class="RT">
+    <strong>lm→cd：</strong>点光源 cd=lm/(4π)；Spot cd=lm/(2π(1-cos(半角)))<br>
+    <strong>差距：</strong>太阳≈120k lux, 60W灯泡≈800lm(64cd)，差距60–1000×
+  </div></div>
+  <div class="CD" style="margin-top:12px"><div class="CT pu">色温色带</div>
+    <div style="margin-top:8px;height:32px;border-radius:8px;overflow:hidden;display:flex">
+      <div style="flex:1;background:#ff8a2e" title="1800K"></div><div style="flex:1;background:#ffab4e" title="2700K"></div>
+      <div style="flex:1;background:#ffc573" title="3000K"></div><div style="flex:1;background:#ffd9a0" title="3500K"></div>
+      <div style="flex:1;background:#fff1d6" title="4100K"></div><div style="flex:1;background:#fff8ed" title="5000K"></div>
+      <div style="flex:1;background:#fff9f4" title="5500K"></div><div style="flex:1;background:#f0f4ff" title="6500K"></div>
+      <div style="flex:1;background:#d6e4ff" title="7500K"></div><div style="flex:1;background:#b8d0ff" title="10000K"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-top:4px;padding:0 2px"><span>1800K蜡烛</span><span>2700K灯泡</span><span>4100K自然白</span><span>5500K正午</span><span>6500K阴天</span><span>10000K蓝天</span></div>
+  </div>`;
+}
+
+// ── Formula Panel ──
+function renderFormula(){
+  document.getElementById('formulaC').innerHTML=`
+  <div class="FC"><h3>EV100</h3><div class="FO">EV100 = log₂( N² / t × 100 / S )</div><div class="FV">N=光圈 t=快门(s) S=ISO</div><div class="FE">f/8, 1/125s, ISO100 → ≈13</div></div>
+  <div class="FC"><h3>Lux → EV100</h3><div class="FO">EV100 = log₂( E × 100 / 250 )</div><div class="FV">E=照度(lux)</div><div class="FE">100,000 lux → ≈15.3</div></div>
+  <div class="FC"><h3>UE曝光</h3><div class="FO">Exposure = 1 / ( 1.2 × 2^EV100 )</div><div class="FV">UE内部亮度缩放</div><div class="FE">EV100=15 → ≈0.0000254</div></div>
+  <div class="BX pu" style="margin-top:18px"><div class="BT pu">EV100 速查</div>
+    <div class="EG" style="margin-top:7px">
+      <div class="EI"><span class="ev">-6 ~ -2</span><span>月光</span></div>
+      <div class="EI"><span class="ev">-2 ~ 4</span><span>夜间人工光</span></div>
+      <div class="EI"><span class="ev">4 ~ 8</span><span>室内</span></div>
+      <div class="EI"><span class="ev">9 ~ 11</span><span>日出/日落</span></div>
+      <div class="EI"><span class="ev">12 ~ 14</span><span>阴天/Golden</span></div>
+      <div class="EI"><span class="ev">14 ~ 16</span><span>晴天正午</span></div>
+    </div></div>
+  <div class="CD" style="margin-top:18px"><div class="CT bl">🧮 计算器</div>
+    <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div><div class="DL">光圈 f/</div><input id="cA" type="number" value="8" step=".1" oninput="cEV()"></div>
+      <div><div class="DL">快门 1/x</div><input id="cS" type="number" value="125" step="1" oninput="cEV()"></div>
+      <div><div class="DL">ISO</div><input id="cI" type="number" value="100" step="100" oninput="cEV()"></div>
+    </div>
+    <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><div class="DL">Lux</div><input id="cL" type="number" value="100000" step="1000" oninput="cLux()"></div>
+      <div style="display:flex;align-items:flex-end"><div id="cR" style="padding:6px 10px;background:rgba(96,165,250,.07);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--blue);width:100%;text-align:center;border:1px solid rgba(96,165,250,.2)">EV100 = 13.0</div></div>
+    </div></div>`;
+}
+function cEV(){const N=parseFloat(document.getElementById('cA').value)||8,t=1/(parseFloat(document.getElementById('cS').value)||125),I=parseFloat(document.getElementById('cI').value)||100;document.getElementById('cR').textContent='EV100 = '+(Math.log2(N*N/t*100/I)).toFixed(1);}
+function cLux(){const l=parseFloat(document.getElementById('cL').value)||0;if(l<=0){document.getElementById('cR').textContent='—';return;}document.getElementById('cR').textContent='EV100 ≈ '+(Math.log2(l*100/250)).toFixed(1)+' (Lux)';}
+
+// ── Flow Panel ──
+function renderFlow(){
+  const steps=[
+    ['项目设置','Extend Default Luminance Range开启(5.1+默认)'],
+    ['PPV曝光','Manual模式，锁定Min/Max EV100(正午≈15，室内≈7)'],
+    ['Directional Light','根据场景设Lux+色温+角度，开启Atmosphere Sun Light'],
+    ['Sky Light','Real Time Capture，Intensity根据场景调节'],
+    ['Sky Atmosphere','Rayleigh=天空颜色 / Mie=雾霾+散射 / Ground Albedo=地面反射'],
+    ['Height Fog + Volumetric','Density/Falloff/Color根据天气调节，Volumetric的Extinction控制遮蔽'],
+    ['人工光源','真实lm/cd值，Inverse Squared Falloff=On，用色温'],
+    ['反射','Lumen质量设置，放置Reflection Captures作回退'],
+    ['后处理','Tone Mapper(ACES) / Bloom / Color Grading / Local Exposure'],
+  ];
+  let h=`<p class="sub" style="margin-bottom:18px"><strong style="color:var(--t1)">先曝光 → 光源 → 大气 → 雾 → 反射 → 后处理</strong></p>`;
+  steps.forEach((s,i)=>h+=`<div class="WS"><div class="WN">${i+1}</div><div class="WC"><h4>${s[0]}</h4><p>${s[1]}</p></div></div>`);
+  h+=`<div class="BX rd" style="margin-top:12px"><div class="BT rd">⚠️ 常见陷阱</div>
+    <strong>1.</strong> 100k lux+默认EV=全白 → 先设曝光<br>
+    <strong>2.</strong> Auto Exposure干扰 → Manual锁定<br>
+    <strong>3.</strong> Lux已含天空贡献 → DirLight略低于总Lux<br>
+    <strong>4.</strong> 月光0.25lux太暗 → 可提至1-5lux<br>
+    <strong>5.</strong> Mie Scale过高会吞噬DirLight色彩<br>
+    <strong>6.</strong> Vol.Fog Albedo应≈1.0(水粒子)不要太低</div>`;
+  h+=`<div class="BX bl" style="margin-top:14px"><div class="BT bl">🔗 完整参数链</div><div class="RT">
+    <strong>DirLight(Lux)</strong> → 绝对亮度 → 决定EV100选择<br>
+    <strong>EV100</strong> → 画面亮度 → 光圈/快门/ISO<br>
+    <strong>SkyLight</strong> → 阴影填充 → 与DirLight比=对比度<br>
+    <strong>Sky Atmosphere</strong> → Rayleigh=天空颜色 / Mie=雾霾散射<br>
+    <strong>Height Fog</strong> → 大气密度 / Volumetric=光散射<br>
+    <strong>Reflections</strong> → 受所有光源影响 / Roughness决定方式+成本<br>
+    <strong style="color:var(--cyan)">光源 → 曝光 → 大气 → 雾 → 反射 → 后处理 = 完整链路</strong>
+  </div></div>`;
+  document.getElementById('flowC').innerHTML=h;
+}
+
+// ── INIT ──
+initTabs();buildBar();renderS();renderRefl();renderUnits();renderFormula();renderFlow();cEV();
 </script>
 </body>
 </html>
