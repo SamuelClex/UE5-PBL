@@ -71,7 +71,7 @@
 - [Magnopus — Lighting in Unreal with PBL](https://www.magnopus.com/blog/lighting-in-unreal-with-photography-principles)
 - [Silicon Studio — Physically-based lighting with Enlighten and UE4](https://www.siliconstudio.co.jp/middleware/enlighten/en/blog/2019/20190322/)
 - [Wikipedia — Exposure Value](https://en.wikipedia.org/wiki/Exposure_value)
-- NVIDIA GPU Gems 2 — Accurate Atmospheric Scattering
+- [NVIDIA GPU Gems 2 — Accurate Atmospheric Scattering](https://developer.nvidia.com/gpugems/gpugems2/part-ii-shading-lighting-and-shadows/chapter-16-accurate-atmospheric-scattering)
 
 ## 使用方式
 
