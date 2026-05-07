@@ -2,7 +2,7 @@
 
 一份基于真实世界照度数据的 **Unreal Engine 5 物理灯光工作流参考手册**，涵盖从晴天正午到雷暴沙暴的全场景、全参数对照。
 
-🔗 **在线查看：** [GitHub Pages 链接（替换为你的地址）]
+🔗 **在线查看：https://samuelclex.github.io/UE5-PBL/
 
 ---
 
