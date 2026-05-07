@@ -1,6 +1,8 @@
 # UE5 Physically Based Lighting — Complete Reference
 # UE5 物理灯光 (PBL) — 完整参考手册
 
+🔗 **在线查看：** [https://samuelclex.github.io/UE5-PBL/]
+
 ---
 
 ## What Is This / 这是什么
