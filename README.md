@@ -2,6 +2,7 @@
 # UE5 物理灯光 (PBL) — 完整参考手册
 
 🔗 **在线查看：** [https://samuelclex.github.io/UE5-PBL/]
+🔗 **Online Preview：** [https://samuelclex.github.io/UE5-PBL/index_en.html]
 
 ---
 
