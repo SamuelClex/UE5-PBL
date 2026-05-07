@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UE5 PBL Complete Reference v3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+:root{--bg:#08090e;--c1:rgba(255,255,255,0.03);--c2:rgba(255,255,255,0.055);--bd:rgba(255,255,255,0.07);--t1:#e4e4e7;--t2:#a1a1aa;--t3:#52525b;--blue:#60a5fa;--amber:#f59e0b;--green:#34d399;--purple:#a78bfa;--red:#f87171;--cyan:#22d3ee;--pink:#f0abfc;--sky:#38bdf8;--sand:#d97706;--snow:#94a3b8}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--t1);line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(96,165,250,0.04),transparent 60%),radial-gradient(ellipse 60% 50% at 80% 90%,rgba(167,139,250,0.03),transparent 60%);pointer-events:none;z-index:0}
+.W{max-width:1120px;margin:0 auto;padding:36px 20px 56px;position:relative;z-index:1}
+h1{font-size:28px;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,#60a5fa,#a78bfa,#f0abfc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.sub{font-size:13px;color:var(--t2);max-width:760px;line-height:1.7;margin-bottom:32px}
+.TN{display:flex;gap:2px;margin-bottom:26px;background:var(--c1);border-radius:11px;padding:3px;border:1px solid var(--bd);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.TB{padding:8px 16px;border:0;background:0;color:var(--t3);font-size:11.5px;font-weight:600;font-family:inherit;cursor:pointer;border-radius:8px;transition:.2s;white-space:nowrap}
+.TB:hover{color:var(--t2);background:rgba(255,255,255,.04)}
+.TB.on{color:var(--blue);background:rgba(96,165,250,.1)}
+.TP{display:none;animation:fu .28s ease}.TP.on{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.SB{display:flex;gap:6px;margin-bottom:20px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+.SI{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 12px;border-radius:10px;border:2px solid transparent;background:var(--c1);cursor:pointer;transition:.2s;min-width:82px;flex-shrink:0;font-family:inherit}
+.SI:hover{background:var(--c2);border-color:rgba(255,255,255,.1)}
+.SI.on{border-color:var(--blue);background:rgba(96,165,250,.08)}
+.SI .ic{font-size:22px;line-height:1}
+.SI .lb{font-size:9px;font-weight:600;color:var(--t3);text-align:center;line-height:1.25}
+.SI.on .lb{color:var(--blue)}
+.SCAT{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;padding:9px 6px;flex-shrink:0;align-self:center;opacity:.5}
+.H{border-radius:13px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden}
+.H::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(4px)}
+.HC{position:relative;z-index:1}
+.H h2{font-size:20px;font-weight:800;color:#fff;margin-bottom:2px}
+.H p{font-size:12px;color:rgba(255,255,255,.8)}
+.SD{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--bd)}
+.G2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.G3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:720px){.G2,.G3{grid-template-columns:1fr}}
+.CD{background:var(--c1);border:1px solid var(--bd);border-radius:11px;padding:14px;transition:border-color .2s}
+.CD:hover{border-color:rgba(255,255,255,.12)}
+.CT{font-size:11px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.CT.am{color:var(--amber)}.CT.bl{color:var(--blue)}.CT.gn{color:var(--green)}.CT.pu{color:var(--purple)}.CT.rd{color:var(--red)}.CT.cy{color:var(--cyan)}.CT.pk{color:var(--pink)}.CT.sk{color:var(--sky)}.CT.sa{color:var(--sand)}.CT.sn{color:var(--snow)}
+.DR{margin-bottom:10px}.DR:last-child{margin-bottom:0}
+.DL{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);font-weight:700;margin-bottom:1px}
+.DV{font-size:13px;font-weight:600;color:var(--t1);line-height:1.35}
+.DS{font-size:10.5px;color:var(--t2);margin-top:1px;line-height:1.45}
+.BX{margin-top:16px;padding:13px 15px;border-radius:10px;font-size:11.5px;line-height:1.7}
+.BX.bl{background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.14);color:var(--t2)}
+.BX.am{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.14);color:var(--t2)}
+.BX.gn{background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.14);color:var(--t2)}
+.BX.pu{background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.14);color:var(--t2)}
+.BX.rd{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.14);color:var(--t2)}
+.BT{font-weight:700;margin-bottom:4px;font-size:11.5px}
+.BT.bl{color:var(--blue)}.BT.am{color:var(--amber)}.BT.gn{color:var(--green)}.BT.pu{color:var(--purple)}.BT.rd{color:var(--red)}.BT.cy{color:var(--cyan)}
+.BG{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:600}
+.BG.am{background:rgba(245,158,11,.12);color:var(--amber)}.BG.gn{background:rgba(52,211,153,.12);color:var(--green)}.BG.bl{background:rgba(96,165,250,.12);color:var(--blue)}.BG.pu{background:rgba(167,139,250,.12);color:var(--purple)}.BG.rd{background:rgba(248,113,113,.12);color:var(--red)}
+.TW{overflow-x:auto;border-radius:9px;border:1px solid var(--bd)}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead tr{background:rgba(255,255,255,.04)}
+th{padding:8px 10px;text-align:left;font-weight:700;color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--bd)}
+td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--t2)}
+tr:nth-child(even){background:rgba(255,255,255,.015)}
+td:first-child{color:var(--t1);font-weight:600}
+.FC{padding:16px;border-radius:10px;background:var(--c1);border:1px solid var(--bd);margin-bottom:12px}
+.FC h3{font-size:13px;font-weight:700;margin-bottom:7px}
+.FO{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--blue);padding:9px 12px;background:rgba(96,165,250,.07);border-radius:8px;margin-bottom:7px;overflow-x:auto}
+.FV{font-size:10.5px;color:var(--t2);margin-bottom:2px}
+.FE{font-size:10.5px;color:var(--green)}
+.EG{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+@media(max-width:480px){.EG{grid-template-columns:1fr}}
+.EI{display:flex;justify-content:space-between;padding:6px 9px;background:rgba(255,255,255,.03);border-radius:6px;font-size:10.5px}
+.EI .ev{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--purple)}
+.WS{display:flex;gap:13px;align-items:flex-start;margin-bottom:18px;position:relative}
+.WS:not(:last-child)::after{content:'';position:absolute;left:15px;top:36px;bottom:-10px;width:2px;background:linear-gradient(180deg,rgba(96,165,250,.3),rgba(167,139,250,.1))}
+.WN{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 0 12px rgba(96,165,250,.2);position:relative;z-index:1}
+.WC{flex:1;padding-top:1px}
+.WC h4{font-size:13px;font-weight:700;margin-bottom:2px}
+.WC p{font-size:11.5px;color:var(--t2);line-height:1.65}
+.RT{font-size:11.5px;color:var(--t2);line-height:1.9}
+.RT strong{color:var(--t1)}
+input[type=number]{width:100%;padding:6px 8px;background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:6px;color:var(--t1);font-size:12px;font-family:inherit;outline:0}
+input:focus{border-color:var(--blue)}
+.FT{margin-top:40px;padding-top:12px;border-top:1px solid var(--bd);text-align:center;font-size:9.5px;color:var(--t3);line-height:1.6}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:0}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="W">
+<h1>UE5 Physically Based Lighting — Complete Reference v3</h1>
+<p class="sub">All parameters unified per scenario: Directional Light / Sky Light / Sky Atmosphere / Fog / Reflections / Exposure / Post Process. Pick a time of day or weather condition to see every value at once.</p>
+<div class="TN" id="tnav"></div>
+<div id="t-scenes" class="TP on"><div class="SB" id="sbar"></div><div id="sdet"></div></div>
+<div id="t-refl" class="TP"><div id="reflC"></div></div>
+<div id="t-units" class="TP"><div id="unitsC"></div></div>
+<div id="t-formula" class="TP"><div id="formulaC"></div></div>
+<div id="t-flow" class="TP"><div id="flowC"></div></div>
+<div class="FT">Sources: Epic Games Docs / Wikipedia EV / PBL Database (Arthur Tasquin) / Magnopus / Silicon Studio / NVIDIA GPU Gems<br>All values are reference ranges — adjust to your artistic direction.</div>
+</div>
+<script>
+const S=[
+{cat:'Time',ic:'☀️',lb:'Midday',sub:'Clear Sky',ds:'Direct sunlight, peak illumination',gr:'linear-gradient(180deg,#87CEEB,#f0e68c)',
+ dir:{lux:'100,000–120,000 lux',n:'Direct sun + sky contribution',tp:'5500–6500K',td:'Neutral white, slightly cool',ag:'70°–90° (latitude dependent)',sh:'Shortest, hardest shadows — 16:1 (4 stops)',soft:'0.5° (real sun angular size)',shaft:'Optional'},
+ sky:{i:'1.0',l:'8,000–12,000 cd/m²',c:'Follows atmosphere (pure blue)',rtc:'Enabled',lh:'Auto'},
+ atmo:{rs:'1.0',rc:'Default blue (0.175, 0.409, 1.0)',rh:'8 km',ms:'1.0',mc:'White (1, 1, 1)',mh:'1.2 km',ma:'0.8 (strong forward scatter)',mab:'Default',multi:'1.0',ga:'0.2, 0.2, 0.2',abs:'1.0'},
+ fog:{d:'0.001–0.005',fo:'2.0–3.0',col:'Pale sky blue',dist:'500–1000 m',vf:'Optional',ve:'0.5–1.0',vsd:'0.8–0.9',va:'1.0',second:'Off'},
+ refl:{note:'Standard roughness behavior. Clean metal/glass reflections.',wet:'N/A',rough:'Material base values'},
+ exp:{ev:'14–16',t:'15',ap:'f/11–f/16',sh:'1/125–1/250',iso:'100',co:'0'},
+ pp:{bl:'0.3–0.5',bt:'1.0',lf:'Optional, low',vig:'0.1–0.2',sat:'1.0',cg:'Neutral',extra:''},
+ tip:'The simplest PBL scenario. Set DirLight to 120k lux, lock EV100≈15. Default Sky Atmosphere values already represent clear midday. SkyLight shadow fill determines the key/fill ratio.'},
+{cat:'Time',ic:'🌅',lb:'Golden Hour',sub:'Magic Hour',ds:'1h after sunrise / before sunset — peak cinematic',gr:'linear-gradient(180deg,#87CEEB,#FFA500 60%,#FF6347)',
+ dir:{lux:'10,000–40,000 lux',n:'Sunlight through thicker atmosphere',tp:'3000–4000K',td:'Warm orange to gold',ag:'10°–30°',sh:'Long, soft shadows — 8:1 (3 stops)',soft:'0.5–1.0°',shaft:'Recommended (God Rays)'},
+ sky:{i:'0.8–1.0',l:'2,000–6,000 cd/m²',c:'Blue zenith, warm orange-pink horizon',rtc:'Enabled',lh:'Auto'},
+ atmo:{rs:'1.0–1.5',rc:'Default',rh:'8 km',ms:'2.0–4.0 (larger sun halo)',mc:'Warm (1, 0.95, 0.85)',mh:'1.2 km',ma:'0.85–0.95 (very strong → large halo)',mab:'Warm (1, 0.9, 0.7)',multi:'1.0',ga:'0.2–0.3',abs:'1.0–1.5 (more = redder)'},
+ fog:{d:'0.005–0.02',fo:'0.8–1.5',col:'Warm gold / orange',dist:'200–500 m',vf:'Recommended',ve:'1.0–1.5',vsd:'0.7–0.85',va:'1.0',second:'Optional, warm tint'},
+ refl:{note:'Warm-tinted reflections. Metal surfaces appear golden.',wet:'N/A',rough:'Material base values'},
+ exp:{ev:'12–14',t:'13',ap:'f/8–f/11',sh:'1/60–1/125',iso:'100–200',co:'0 to +0.5'},
+ pp:{bl:'0.5–0.8',bt:'0.8',lf:'Recommended (warm mood)',vig:'0.2–0.3',sat:'1.0–1.1',cg:'Midtones warm',extra:'Light Shaft Bloom enabled'},
+ tip:'Pitch DirLight low (-10° to -30°). Mie Anisotropy at 0.9+ creates a large sun halo. Light Shaft Bloom + Volumetric Fog = God Rays. The most cinematic time of day.'},
+{cat:'Time',ic:'🌄',lb:'Sunrise',sub:'Dawn',ds:'Sun just breaking the horizon',gr:'linear-gradient(180deg,#1a1a2e,#e94560 40%,#FFA500 80%,#FFD700)',
+ dir:{lux:'400–1,000 lux',n:'Extreme atmospheric scattering',tp:'2000–3000K',td:'Deep orange to red',ag:'0°–10°',sh:'Very long, very soft — 4:1 (2 stops)',soft:'1.0–2.0°',shaft:'Recommended'},
+ sky:{i:'0.5–0.8',l:'500–2,000 cd/m²',c:'Warm purple (follows atmosphere)',rtc:'Enabled',lh:'Auto'},
+ atmo:{rs:'1.0',rc:'Default (auto handles gradient)',rh:'8 km',ms:'1.5–3.0',mc:'Warm tint',mh:'1.2 km',ma:'0.8–0.9',mab:'Default',multi:'1.0',ga:'0.2',abs:'1.0'},
+ fog:{d:'0.01–0.03',fo:'0.5–1.0',col:'Warm pink / pale orange',dist:'100–300 m',vf:'Recommended (morning mist)',ve:'1.0–2.0',vsd:'0.6–0.8',va:'1.0',second:'Recommended (low-layer mist)'},
+ refl:{note:'Warm reflections. Water surfaces reflect dawn colors. Optional dew (Roughness -0.05).',wet:'Optional morning dew',rough:'Base or slightly reduced'},
+ exp:{ev:'9–12',t:'11',ap:'f/4–f/8',sh:'1/30–1/60',iso:'200–400',co:'+0.5 to +1.0'},
+ pp:{bl:'0.8–1.2',bt:'0.6',lf:'Dreamy feel',vig:'0.2–0.3',sat:'1.0',cg:'Shadows purple-blue tint',extra:''},
+ tip:'Sky Atmosphere auto-handles the sky gradient (warm red horizon → cool blue zenith). Use Second Fog Layer with low Falloff for ground-level morning mist.'},
+{cat:'Time',ic:'🌇',lb:'Sunset',sub:'Dusk',ds:'Sun sinking below the horizon',gr:'linear-gradient(180deg,#2d1b69,#e94560 30%,#ff6b35 60%,#ffa62b)',
+ dir:{lux:'400–1,000 lux',n:'More aerosols than sunrise → redder',tp:'1800–2500K',td:'Deep red-orange, warmer than sunrise',ag:'0°–5°',sh:'Very long, blue-purple tinted',soft:'1.0–2.0°',shaft:'Strongly recommended'},
+ sky:{i:'0.4–0.7',l:'500–3,000 cd/m²',c:'Rich red-purple (follows atmo)',rtc:'Enabled',lh:'Auto'},
+ atmo:{rs:'1.0–1.5',rc:'Default',rh:'8 km',ms:'3.0–5.0 (higher than sunrise)',mc:'Warm (1, 0.9, 0.7)',mh:'1.2 km',ma:'0.85–0.95',mab:'Warm (1, 0.8, 0.5)',multi:'1.0',ga:'0.2–0.3',abs:'1.0–1.5'},
+ fog:{d:'0.01–0.05',fo:'0.5–1.0',col:'Warm orange / red',dist:'100–300 m',vf:'Recommended',ve:'1.5–2.5',vsd:'0.7–0.85',va:'1.0',second:'Recommended (red tint)'},
+ refl:{note:'Strong warm reflections. Water surfaces turn gold-red.',wet:'N/A',rough:'Material base values'},
+ exp:{ev:'9–12',t:'11',ap:'f/4–f/8',sh:'1/30–1/60',iso:'200–400',co:'+0.5 to +1.5'},
+ pp:{bl:'1.0–1.5',bt:'0.5',lf:'Strongly recommended',vig:'0.3–0.4',sat:'1.1–1.2',cg:'Gain warm orange',extra:'Volumetric Clouds peak beauty'},
+ tip:'More saturated than sunrise (afternoon aerosols). Mie Scale 3–5, Anisotropy 0.9+. Mie Absorption warm tint enhances reds. Volumetric Clouds are most dramatic now.'},
+{cat:'Time',ic:'🌆',lb:'Twilight',sub:'Blue Hour',ds:'After sunset, before full dark',gr:'linear-gradient(180deg,#0c0c3a,#2d1b69 30%,#e94560 70%,#ff8c69)',
+ dir:{lux:'1–400 lux',n:'Sun below horizon, scattered light only',tp:'7000–12000K',td:'Cold blue to deep purple',ag:'Sun at -1° to -18°',sh:'Almost no shadows',soft:'5°+',shaft:'Off'},
+ sky:{i:'0.2–0.5',l:'100–1,000 cd/m²',c:'Cold blue-purple',rtc:'Enabled',lh:'Deep blue-gray'},
+ atmo:{rs:'1.0',rc:'Default',rh:'8 km',ms:'1.0',mc:'Default',mh:'1.2 km',ma:'0.8',mab:'Default',multi:'1.0–1.5 (compensate darkness)',ga:'0.15',abs:'1.0'},
+ fog:{d:'0.005–0.02',fo:'0.5–1.0',col:'Cold blue-gray',dist:'200–500 m',vf:'Recommended',ve:'1.0–1.5',vsd:'0.5–0.7',va:'1.0',second:'Optional'},
+ refl:{note:'Artificial lights become the primary reflection source.',wet:'N/A',rough:'Material base values'},
+ exp:{ev:'5–9',t:'7',ap:'f/2.8–f/4',sh:'1/8–1/30',iso:'400–1600',co:'+1 to +2'},
+ pp:{bl:'0.5–0.8',bt:'0.3',lf:'Optional',vig:'0.3–0.4',sat:'0.8–0.9',cg:'Shadows deep blue',extra:'Artificial light bloom emphasized'},
+ tip:'The classic urban night scene time — sky still glows but streetlights are on. DirLight very low or off. Rely on SkyLight + artificial Point/Spot lights (streetlights 3000–5000 lm, neon via Emissive cd/m²).'},
+{cat:'Time',ic:'🌙',lb:'Night',sub:'Moonlit',ds:'Full moon or starlight only',gr:'linear-gradient(180deg,#000011,#0a0a2e 50%,#1a1a4e)',
+ dir:{lux:'0.1–0.5 lux (artistic boost)',n:'Real full moon ≈ 0.25 lux',tp:'4100K (moonlight)',td:'Cool white-blue (perceived)',ag:'Moon position',sh:'Faint shadow under full moon',soft:'0.5°',shaft:'Optional (moon shaft)'},
+ sky:{i:'0.01–0.1',l:'0.001–0.01 cd/m²',c:'Deep blue / black',rtc:'Enabled',lh:'Black'},
+ atmo:{rs:'1.0',rc:'Default',rh:'8 km',ms:'1.0',mc:'Default',mh:'1.2 km',ma:'0.8',mab:'Default',multi:'1.0',ga:'0.05 (dark ground)',abs:'1.0'},
+ fog:{d:'0.002–0.01',fo:'0.5–1.5',col:'Deep blue-gray',dist:'300–800 m',vf:'Recommended (moonlight scatter)',ve:'0.5–1.0',vsd:'0.3–0.5',va:'1.0',second:'Optional (ground-level night mist)'},
+ refl:{note:'Artificial lights dominate reflections. Cool blue water reflections under moonlight.',wet:'N/A',rough:'Material base values'},
+ exp:{ev:'-6 to -2',t:'-3',ap:'f/1.4–f/2.8',sh:'1/4–several sec',iso:'1600–6400',co:'+2 to +4'},
+ pp:{bl:'1.0–2.0',bt:'0.2',lf:'At artificial lights',vig:'0.3–0.5',sat:'0.3–0.6 (simulate scotopic vision)',cg:'Overall cool blue',extra:'Low saturation simulates rod-cell vision'},
+ tip:'The hardest scenario. Real moonlight (0.25 lux) vs midday (120k) = 500,000x gap. Boost moon to 0.5–5 lux for usable results. Lower Saturation simulates scotopic (rod-cell) vision. Light Color R:0.7 G:0.8 B:1.0 for "moonlight blue".'},
+{cat:'Weather',ic:'☁️',lb:'Overcast',sub:'Heavy Cloud',ds:'Thick cloud cover, diffuse light dominates',gr:'linear-gradient(180deg,#9e9e9e,#bdbdbd 50%,#e0e0e0)',
+ dir:{lux:'1,000–20,000 lux',n:'Depends on cloud thickness',tp:'6500–7500K',td:'Cool white-blue',ag:'N/A (diffuse)',sh:'Extremely soft or no shadows',soft:'2.0–5.0°',shaft:'Off'},
+ sky:{i:'1.0–1.5 (becomes primary light)',l:'2,000–5,000 cd/m²',c:'Uniform gray-white',rtc:'Enabled',lh:'Gray (0.3, 0.3, 0.32)'},
+ atmo:{rs:'0–0.5 (★drastically reduce blue sky)',rc:'Minimal impact',rh:'8 km',ms:'5.0–10.0 (★high density)',mc:'Gray-white (0.9, 0.9, 0.95)',mh:'1.5–3.0 km',ma:'0.0–0.3 (uniform scatter)',mab:'Gray (0.85, 0.85, 0.9)',multi:'1.5–2.0 (compensate)',ga:'0.15–0.2 (wet ground)',abs:'0–0.5 (reduce ozone tint)'},
+ fog:{d:'0.01–0.05',fo:'0.3–0.8',col:'Cool gray-white',dist:'200–500 m',vf:'Recommended',ve:'1.5–2.5',vsd:'0.4–0.6',va:'1.0',second:'Optional'},
+ refl:{note:'Reflections appear flat and gray-white.',wet:'Optional',rough:'Material base values'},
+ exp:{ev:'12–14',t:'13',ap:'f/5.6–f/8',sh:'1/60–1/125',iso:'100–200',co:'0 to +0.5'},
+ pp:{bl:'0.2–0.4',bt:'1.0',lf:'N/A',vig:'0.1–0.2',sat:'0.85–0.95',cg:'Slightly cool',extra:'Ideal portrait / product lighting'},
+ tip:'Key recipe: Rayleigh Scale → 0–0.5, Mie Scale → 5–10, Mie Anisotropy → 0. SkyLight becomes the dominant light source. DirLight only provides faint directionality. Source Soft Angle 2–5°.'},
+{cat:'Weather',ic:'🌧️',lb:'Rainy',sub:'Moderate Rain',ds:'Gray skies, wet surfaces, reduced visibility',gr:'linear-gradient(180deg,#475569,#94a3b8,#64748b)',
+ dir:{lux:'1,000–8,000 lux',n:'Thick cloud + rain layers',tp:'6500–8000K',td:'Cool gray-blue',ag:'N/A',sh:'Very soft, no shadows',soft:'3.0–5.0°',shaft:'Off'},
+ sky:{i:'0.6–1.0',l:'1,000–3,000 cd/m²',c:'Dark gray-blue',rtc:'Enabled',lh:'Dark gray (0.15, 0.15, 0.18)'},
+ atmo:{rs:'0–0.3',rc:'Default',rh:'8 km',ms:'6.0–12.0',mc:'Gray (0.85, 0.85, 0.9)',mh:'2.0–3.0 km',ma:'0.1–0.3',mab:'Cool gray',multi:'1.5–2.0',ga:'0.1 (wet dark ground)',abs:'0–0.3'},
+ fog:{d:'0.02–0.1',fo:'0.3–0.8',col:'Cool gray-blue (dark)',dist:'100–300 m',vf:'Recommended',ve:'2.0–4.0',vsd:'0.3–0.5',va:'1.0 (water = high scatter)',second:'Recommended'},
+ refl:{note:'★ CORE: Wet surfaces become mirrors. Global Roughness → 0.05–0.15. Use Material Parameter Collection for unified Wetness.',wet:'Global Roughness 0.05–0.15',rough:'MPC-controlled dynamic Wetness'},
+ exp:{ev:'10–13',t:'12',ap:'f/4–f/8',sh:'1/30–1/125',iso:'200–400',co:'0 to +0.5'},
+ pp:{bl:'0.4–0.6',bt:'0.8',lf:'N/A',vig:'0.3–0.4',sat:'0.7–0.85 (desaturated)',cg:'Shadows cool blue-green',extra:'Chromatic Aberration 0.2–0.5'},
+ tip:'Rain visuals = wet reflections. Use MPC to globally reduce Roughness (0.05–0.15). Puddles → Planar Reflection Actors. Streetlights reflecting in wet pavement IS the soul of rain scenes. Niagara rain + splash on collision.'},
+{cat:'Extreme',ic:'⛈️',lb:'Thunderstorm',sub:'Lightning + Heavy Rain',ds:'Intense rain, lightning flashes, high wind',gr:'linear-gradient(180deg,#0f172a,#1e293b,#475569,#f0f9ff)',
+ dir:{lux:'500–5,000 (base) / 80,000+ (lightning)',n:'Heavy clouds + lightning pulses',tp:'7000–9000K base / 6500K flash',td:'Cold gray base / pure white flash',ag:'N/A',sh:'No shadows base / instant hard shadow during flash',soft:'3–5° base / 0.5° flash',shaft:'On during flash (0.1s)'},
+ sky:{i:'0.3–0.6',l:'500–2,000 cd/m²',c:'Cold dark gray-blue',rtc:'Enabled',lh:'Deep gray (0.08, 0.08, 0.1)'},
+ atmo:{rs:'0–0.3 (almost no blue sky)',rc:'Default',rh:'8 km',ms:'8.0–15.0 (★very dark sky)',mc:'Dark gray (0.7, 0.7, 0.75)',mh:'2.0–4.0 km',ma:'0.0–0.2 (uniform)',mab:'Dark gray',multi:'2.0–3.0 (compensate)',ga:'0.08 (wet dark ground)',abs:'0.5'},
+ fog:{d:'0.05–0.2',fo:'0.2–0.5',col:'Dark gray-purple/green (storm signature)',dist:'50–200 m',vf:'Enabled',ve:'3.0–5.0',vsd:'0.15–0.3',va:'0.9–1.0',second:'Density 0.02, Falloff 0.15'},
+ refl:{note:'Wet surfaces (Roughness 0.02–0.1) + lightning flashes = dramatic instant reflections.',wet:'Global Roughness 0.02–0.1',rough:'Extremely low = mirror-like'},
+ exp:{ev:'10–12 base / drops to 6–8 during flash',t:'11',ap:'f/4–f/8',sh:'1/30–1/60',iso:'200–800',co:'0 base / auto during flash'},
+ pp:{bl:'0.8–1.2 base / 3–5 flash',bt:'0.5',lf:'Auto during flash',vig:'0.4–0.6',sat:'0.6–0.8 (desaturated)',cg:'Desat + Shadows blue + flash brightens all',extra:'Chromatic Aberr 0.5–1.0 (flash). Lightning methods: A) DirLight Timeline pulse (0→80k→0 / 0.1s) B) Extra PointLight (50k–200k lm) C) PPV EV drop 2–3 stops'},
+ tip:'Core rhythm: dark base (low Lux + high Mie) → lightning pulse (instant high Lux + low EV + high Bloom) → return to dark. Use Sequencer keyframes on DirLight Intensity synced with audio. Volumetric Fog Emissive spike during flash simulates the whole sky lighting up.'},
+{cat:'Extreme',ic:'🏜️',lb:'Sandstorm',sub:'Dust Storm',ds:'Airborne sand/dust, visibility near zero, orange world',gr:'linear-gradient(180deg,#451a03,#78350f,#b45309,#fbbf24)',
+ dir:{lux:'5,000–30,000 lux',n:'Sunlight filtered through dust',tp:'3000–4500K',td:'Warm orange (dust absorbs short wavelengths)',ag:'Obscured (dust diffusion)',sh:'Very soft, no clear shadows',soft:'2.0–4.0°',shaft:'Enabled (light pillars through dust) 0.5–1.0'},
+ sky:{i:'0.6–1.0',l:'1,000–4,000 cd/m²',c:'Warm orange-gray (R:0.7 G:0.5 B:0.3)',rtc:'Enabled',lh:'Warm brown (0.4, 0.25, 0.1)'},
+ atmo:{rs:'0.2–0.5 (★drastically reduce blue)',rc:'Default',rh:'8 km',ms:'10.0–20.0 (★THE key parameter!)',mc:'Sand (1.0, 0.7, 0.3)',mh:'2.0–5.0 km (dust rises high)',ma:'0.6–0.8 (medium-strong forward)',mab:'Warm absorb (1.0, 0.6, 0.2)',multi:'1.5–2.5',ga:'Desert (0.6, 0.4, 0.2)',abs:'0.5–1.0'},
+ fog:{d:'0.1–0.5 (★high)',fo:'0.1–0.4 (dust at all heights)',col:'Deep orange-tan (R:0.8 G:0.5 B:0.2)',dist:'20–100 m (★very low visibility)',vf:'Enabled',ve:'4.0–8.0 (★very high occlusion)',vsd:'0.5–0.7 (noticeable forward scatter)',va:'0.7–0.85 (dust absorbs some light)',second:'Enabled, redder, denser near ground'},
+ refl:{note:'Reflections severely obscured by dust fog. Distant reflections nearly invisible.',wet:'N/A',rough:'Surfaces covered in dust, Roughness may increase'},
+ exp:{ev:'12–14',t:'13',ap:'f/5.6–f/8',sh:'1/60–1/125',iso:'100–200',co:'0 to +0.5'},
+ pp:{bl:'0.8–1.5',bt:'0.6',lf:'Toward sun recommended',vig:'0.3–0.5',sat:'0.6–0.8 (desaturate, add gray)',cg:'Gain orange (R:1.2 G:0.9 B:0.6), WB 4000–5000K',extra:'DoF near-sharp far-blurred. Niagara: 200–500 dust sprites + Wind Force 500–2000. Ground-level sand flow particles at 0–50cm'},
+ tip:'★ Orange dominates EVERYTHING — Fog, Sky Atmo, SkyLight, Post Process ALL shift warm orange. Mie Scale 10–20 is the single most critical parameter. Light Function with noise texture on DirLight creates moving dust-wall shadows. Distant sandstorm wall via Volumetric Cloud with orange emissive material.'},
+{cat:'Extreme',ic:'❄️',lb:'Blizzard',sub:'Heavy Snowstorm',ds:'Heavy snow, strong wind, whiteout conditions',gr:'linear-gradient(180deg,#e2e8f0,#f1f5f9,#fff,#cbd5e1)',
+ dir:{lux:'2,000–10,000 lux',n:'Thick cloud but snow reflects light back',tp:'7500–10000K',td:'Extremely cold blue-white',ag:'Obscured',sh:'No clear shadows',soft:'3.0–5.0°',shaft:'Off'},
+ sky:{i:'1.0–1.5 (★high — snow reflects lots of light)',l:'2,000–6,000 cd/m²',c:'Cold blue-white (R:0.75 G:0.8 B:0.95)',rtc:'Enabled',lh:'Gray-white (0.5, 0.52, 0.58)'},
+ atmo:{rs:'0.2–0.5',rc:'Default',rh:'8 km',ms:'8.0–15.0 (dense snowstorm)',mc:'White (1, 1, 1)',mh:'2.0–4.0 km',ma:'0.2–0.4 (semi-uniform)',mab:'White',multi:'2.0–2.5',ga:'★Snow (0.8, 0.85, 0.9) — KEY PARAM',abs:'0.3'},
+ fog:{d:'0.05–0.3',fo:'0.2–0.6',col:'Cold gray-white (R:0.85 G:0.88 B:0.95)',dist:'30–150 m',vf:'Enabled',ve:'3.0–6.0',vsd:'0.3–0.5',va:'1.0 (ice crystals = high scatter)',second:'Recommended (ground-level blowing snow)'},
+ refl:{note:'Snow ground high reflectance (Albedo 0.8–0.9). Snow Roughness high (0.6–0.9), ice Roughness low (0.05–0.2).',wet:'N/A (frozen)',rough:'Snow high, ice low'},
+ exp:{ev:'12–14',t:'13',ap:'f/5.6–f/8',sh:'1/60–1/125',iso:'100–200',co:'+0.5 to +1.0 (brighten for snow)'},
+ pp:{bl:'1.0–2.0 (whiteout feel)',bt:'0.5',lf:'N/A',vig:'0.2–0.4',sat:'0.6–0.8 (low saturation)',cg:'Cold blue Shadows/Midtones',extra:'Exposure Comp +0.5–1.0. Niagara snowflakes + strong Wind Force + collision accumulation'},
+ tip:'High brightness + low contrast + cold blue tint. SkyLight Intensity boosted because snow reflects so much light. Ground Albedo 0.8–0.9 is THE key to making Sky Atmosphere look correct for snow. Niagara snow + wind module + collision accumulation.'},
+];
+
+const TABS=[{id:'scenes',label:'🎬 Scenarios'},{id:'refl',label:'🪞 Reflections'},{id:'units',label:'💡 Light Units'},{id:'formula',label:'🔢 Formulas'},{id:'flow',label:'📋 Workflow'}];
+
+function initTabs(){
+  document.getElementById('tnav').innerHTML=TABS.map(t=>`<button class="TB ${t.id==='scenes'?'on':''}" data-t="${t.id}">${t.label}</button>`).join('');
+  document.querySelectorAll('.TB').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.TB').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.TP').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');document.getElementById('t-'+b.dataset.t).classList.add('on');
+  });
+}
+
+let si=0;
+function buildBar(){
+  let h='',lc='';
+  S.forEach((s,i)=>{if(s.cat!==lc){h+=`<div class="SCAT">${s.cat}</div>`;lc=s.cat;}
+    h+=`<button class="SI ${i===si?'on':''}" onclick="setS(${i})"><span class="ic">${s.ic}</span><span class="lb">${s.lb}<br><span style="font-size:8px;font-weight:400;opacity:.65">${s.sub}</span></span></button>`;
+  });document.getElementById('sbar').innerHTML=h;
+}
+function setS(i){si=i;buildBar();renderS();}
+function R(l,v,s){return`<div class="DR"><div class="DL">${l}</div><div class="DV">${v}</div>${s?'<div class="DS">'+s+'</div>':''}</div>`;}
+
+function renderS(){
+  const s=S[si],d=s.dir,k=s.sky,a=s.atmo,f=s.fog,r=s.refl,e=s.exp,pp=s.pp;
+  let h=`<div class="H" style="background:${s.gr}"><div class="HC"><h2>${s.ic} ${s.lb} — ${s.sub}</h2><p>${s.ds}</p></div></div>`;
+  h+=`<div class="SD">Light Sources</div><div class="G2">`;
+  h+=`<div class="CD"><div class="CT am">☀️ Directional Light</div>${R('Intensity (Lux)',d.lux,d.n)}${R('Color Temperature',d.tp,d.td)}${R('Angle',d.ag)}${R('Shadow',d.sh)}${R('Source Soft Angle',d.soft)}${R('Light Shaft',d.shaft)}</div>`;
+  h+=`<div class="CD"><div class="CT bl">🌤 Sky Light</div>${R('Intensity',k.i,k.l)}${R('Color',k.c)}${R('Real Time Capture',k.rtc)}${R('Lower Hemisphere',k.lh)}</div></div>`;
+  h+=`<div class="SD">Sky Atmosphere</div><div class="G2">`;
+  h+=`<div class="CD"><div class="CT sk">🔵 Rayleigh Scattering (Air Molecules)</div>${R('Scattering Scale',a.rs)}${R('Scattering Color',a.rc)}${R('Exp. Distribution',a.rh)}</div>`;
+  h+=`<div class="CD"><div class="CT am">🟠 Mie Scattering (Aerosols / Dust)</div>${R('Scattering Scale',a.ms)}${R('Scattering Color',a.mc)}${R('Exp. Distribution',a.mh)}${R('Anisotropy (Phase)',a.ma)}${R('Absorption',a.mab)}</div></div>`;
+  h+=`<div class="G3" style="margin-top:12px"><div class="CD"><div class="CT gn">Multi Scattering</div>${R('Value',a.multi)}</div><div class="CD"><div class="CT gn">Ground Albedo</div>${R('Value',a.ga)}</div><div class="CD"><div class="CT gn">Absorption Scale</div>${R('Value',a.abs)}</div></div>`;
+  h+=`<div class="SD">Fog — Exponential Height Fog + Volumetric</div><div class="G2">`;
+  h+=`<div class="CD"><div class="CT gn">📊 Height Fog</div>${R('Fog Density',f.d)}${R('Height Falloff',f.fo)}${R('Inscattering Color',f.col)}${R('Start Distance',f.dist)}${R('Second Fog Layer',f.second)}</div>`;
+  h+=`<div class="CD"><div class="CT cy">🌀 Volumetric Fog</div>${R('Enable',f.vf)}${R('Extinction Scale',f.ve,'Light attenuation / occlusion')}${R('Scattering Distribution',f.vsd,'0 = uniform, 1 = forward')}${R('Albedo',f.va,'Water/ice ≈ 1.0')}</div></div>`;
+  h+=`<div class="SD">Reflection Impact</div><div class="CD"><div class="CT pu">🪞 Reflection Characteristics</div>${R('Overall',r.note)}${R('Wetness',r.wet)}${R('Roughness Adjustment',r.rough)}</div>`;
+  h+=`<div class="SD">Exposure — Post Process Volume</div><div class="G2">`;
+  h+=`<div class="CD"><div class="CT gn">📷 Exposure</div>${R('EV100',e.ev,'Recommended: '+e.t)}${R('Aperture',e.ap)}${R('Shutter',e.sh)}${R('ISO',e.iso)}${R('Compensation',e.co)}</div>`;
+  h+=`<div class="CD"><div class="CT pk">🎨 Post Process</div>${R('Bloom Intensity',pp.bl)}${R('Bloom Threshold',pp.bt)}${R('Lens Flare',pp.lf)}${R('Vignette',pp.vig)}${R('Saturation',pp.sat)}${R('Color Grading',pp.cg)}${pp.extra?R('Extra',pp.extra):''}</div></div>`;
+  h+=`<div class="BX bl"><div class="BT bl">💡 Practical Tip</div>${s.tip}</div>`;
+  document.getElementById('sdet').innerHTML=h;
+}
+
+function renderRefl(){
+  document.getElementById('reflC').innerHTML=`
+  <div class="G2">
+    <div class="CD"><div class="CT bl">🔷 Lumen Reflections</div>
+      ${R('Enable','Project Settings → Reflection Method = Lumen')}
+      ${R('Quality','SRT (Software) / HWRT (Hardware RT)','HWRT more accurate, more expensive')}
+      ${R('MaxRoughnessToTrace','Default 0.4','Roughness > 0.4 uses Final Gather (free)')}
+      ${R('Hit Lighting','Enable for accurate reflection color (HWRT only)')}
+      ${R('Screen Traces','Default On (SSR overlay)','r.Lumen.Reflections.ScreenTraces=0 to disable')}
+      ${R('Foliage Optimization','r.Lumen.Reflections.MaxRoughnessToTraceForFoliage=0')}</div>
+    <div class="CD"><div class="CT gn">🟢 SSR + Reflection Captures</div>
+      ${R('SSR Quality','PPV → SSR → Quality 1–100')}
+      ${R('SSR Max Roughness','0.6–0.8')}
+      ${R('SSR Limitation','Cannot reflect off-screen or back-facing objects')}
+      ${R('Capture Types','Sphere / Box Reflection Capture')}
+      ${R('Capture Purpose','Final fallback for Lumen / SSR')}
+      ${R('Capture Resolution','128–512 (higher = more expensive)')}</div>
+  </div>
+  <div class="BX pu" style="margin-top:16px"><div class="BT pu">💡 Reflection Optimization</div><div class="RT">
+    <strong>Roughness is the cost driver:</strong> Low Roughness (< 0.4) runs full ray trace. High Roughness uses Final Gather (cheap).<br>
+    <strong>Fallback chain:</strong> Lumen RT → SSR Screen Traces → Reflection Captures.<br>
+    <strong>Wet materials:</strong> Material Parameter Collection to control global Wetness, dynamically reducing Roughness.<br>
+    <strong>Standing water:</strong> Planar Reflection Actors for flat water bodies.
+  </div></div>`;
+}
+
+function renderUnits(){
+  document.getElementById('unitsC').innerHTML=`
+  <div class="BX am" style="margin-bottom:18px"><div class="BT am">Core Concept</div>
+    Directional Light = <span class="BG am">Lux</span> &nbsp; Point/Spot/Rect = <span class="BG gn">Candela</span> / <span class="BG bl">Lumen</span> &nbsp; Emissive / SkyLight = <span class="BG pu">cd/m²</span></div>
+  <div class="TW"><table>
+    <thead><tr><th>Actor</th><th>Unit</th><th>UE Default</th><th>PBL Range</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Directional</td><td>Lux</td><td>10</td><td>0.25–120k</td><td>Sun / Moon</td></tr>
+      <tr><td>Point</td><td>cd / lm</td><td>8 cd</td><td>60W bulb ≈ 800 lm</td><td>Light bulbs</td></tr>
+      <tr><td>Spot</td><td>cd / lm</td><td>8 cd</td><td>Angle dependent</td><td>Spotlights</td></tr>
+      <tr><td>Rect</td><td>cd / lm</td><td>8 cd</td><td>Area dependent</td><td>Screens / Windows</td></tr>
+      <tr><td>Sky Light</td><td>cd/m² (mult)</td><td>1.0</td><td>0.01–1.5</td><td>Sky fill</td></tr>
+      <tr><td>Emissive</td><td>cd/m²</td><td>—</td><td>Candle 7 / Screen 200</td><td>Self-illumination</td></tr>
+    </tbody></table></div>
+  <div class="SD" style="margin-top:20px">Common Indoor Light Sources</div>
+  <div class="TW"><table>
+    <thead><tr><th>Source</th><th>lm</th><th>cd</th><th>Color Temp</th><th>EV100</th></tr></thead>
+    <tbody>
+      <tr><td>Candle</td><td>12</td><td>~1</td><td>1800K</td><td>1–4</td></tr>
+      <tr><td>Desk Lamp 40W</td><td>450</td><td>~36</td><td>2700K</td><td>5–7</td></tr>
+      <tr><td>Ceiling 60W</td><td>800</td><td>~64</td><td>2700–3000K</td><td>7–8</td></tr>
+      <tr><td>Office Fluorescent</td><td>3,200</td><td>~255</td><td>4000–5000K</td><td>8–9</td></tr>
+      <tr><td>Spotlight</td><td>500–1,000</td><td>Angle dep.</td><td>3000–5000K</td><td>7–10</td></tr>
+    </tbody></table></div>
+  <div class="CD" style="margin-top:16px"><div class="CT am">Unit Relationships</div><div class="RT">
+    <strong>Lumen → Candela:</strong> Point light: cd = lm / (4π). Spot light: cd = lm / (2π(1 − cos(half-angle))).<br>
+    <strong>Scale gap:</strong> Sun ≈ 120k lux, 60W bulb ≈ 800 lm (64 cd) — 60–1000× difference.
+  </div></div>
+  <div class="CD" style="margin-top:12px"><div class="CT pu">Color Temperature Strip</div>
+    <div style="margin-top:8px;height:32px;border-radius:8px;overflow:hidden;display:flex">
+      <div style="flex:1;background:#ff8a2e" title="1800K"></div><div style="flex:1;background:#ffab4e" title="2700K"></div>
+      <div style="flex:1;background:#ffc573" title="3000K"></div><div style="flex:1;background:#ffd9a0" title="3500K"></div>
+      <div style="flex:1;background:#fff1d6" title="4100K"></div><div style="flex:1;background:#fff8ed" title="5000K"></div>
+      <div style="flex:1;background:#fff9f4" title="5500K"></div><div style="flex:1;background:#f0f4ff" title="6500K"></div>
+      <div style="flex:1;background:#d6e4ff" title="7500K"></div><div style="flex:1;background:#b8d0ff" title="10000K"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-top:4px;padding:0 2px"><span>1800K Candle</span><span>2700K Bulb</span><span>4100K Neutral</span><span>5500K Noon</span><span>6500K Overcast</span><span>10000K Sky</span></div>
+  </div>`;
+}
+
+function renderFormula(){
+  document.getElementById('formulaC').innerHTML=`
+  <div class="FC"><h3>EV100 Formula</h3><div class="FO">EV100 = log₂( N² / t × 100 / S )</div><div class="FV">N = aperture, t = shutter time (s), S = ISO</div><div class="FE">f/8, 1/125s, ISO 100 → ≈ 13</div></div>
+  <div class="FC"><h3>Lux → EV100</h3><div class="FO">EV100 = log₂( E × 100 / 250 )</div><div class="FV">E = illuminance (lux)</div><div class="FE">100,000 lux → ≈ 15.3</div></div>
+  <div class="FC"><h3>UE Internal Exposure</h3><div class="FO">Exposure = 1 / ( 1.2 × 2^EV100 )</div><div class="FV">Internal luminance scaler</div><div class="FE">EV100 = 15 → ≈ 0.0000254</div></div>
+  <div class="BX pu" style="margin-top:18px"><div class="BT pu">EV100 Quick Reference</div>
+    <div class="EG" style="margin-top:7px">
+      <div class="EI"><span class="ev">-6 to -2</span><span>Moonlight</span></div>
+      <div class="EI"><span class="ev">-2 to 4</span><span>Night artificial</span></div>
+      <div class="EI"><span class="ev">4 to 8</span><span>Indoor</span></div>
+      <div class="EI"><span class="ev">9 to 11</span><span>Sunrise / Sunset</span></div>
+      <div class="EI"><span class="ev">12 to 14</span><span>Overcast / Golden</span></div>
+      <div class="EI"><span class="ev">14 to 16</span><span>Clear midday</span></div>
+    </div></div>
+  <div class="CD" style="margin-top:18px"><div class="CT bl">🧮 Calculator</div>
+    <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div><div class="DL">Aperture f/</div><input id="cA" type="number" value="8" step=".1" oninput="cEV()"></div>
+      <div><div class="DL">Shutter 1/x</div><input id="cS" type="number" value="125" step="1" oninput="cEV()"></div>
+      <div><div class="DL">ISO</div><input id="cI" type="number" value="100" step="100" oninput="cEV()"></div>
+    </div>
+    <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><div class="DL">Lux</div><input id="cL" type="number" value="100000" step="1000" oninput="cLux()"></div>
+      <div style="display:flex;align-items:flex-end"><div id="cR" style="padding:6px 10px;background:rgba(96,165,250,.07);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--blue);width:100%;text-align:center;border:1px solid rgba(96,165,250,.2)">EV100 = 13.0</div></div>
+    </div></div>`;
+}
+function cEV(){const N=parseFloat(document.getElementById('cA').value)||8,t=1/(parseFloat(document.getElementById('cS').value)||125),I=parseFloat(document.getElementById('cI').value)||100;document.getElementById('cR').textContent='EV100 = '+(Math.log2(N*N/t*100/I)).toFixed(1);}
+function cLux(){const l=parseFloat(document.getElementById('cL').value)||0;if(l<=0){document.getElementById('cR').textContent='—';return;}document.getElementById('cR').textContent='EV100 ≈ '+(Math.log2(l*100/250)).toFixed(1)+' (from Lux)';}
+
+function renderFlow(){
+  const steps=[
+    ['Project Settings','Enable Extend Default Luminance Range (UE5.1+ default)'],
+    ['PPV Exposure','Manual metering mode. Lock Min/Max EV100 (midday ≈ 15, indoor ≈ 7)'],
+    ['Directional Light','Set Lux + color temp + angle per scenario. Enable Atmosphere Sun Light'],
+    ['Sky Light','Real Time Capture. Adjust Intensity per scenario — this controls the key/fill ratio'],
+    ['Sky Atmosphere','Rayleigh = sky color / Mie = haze & scatter / Ground Albedo = ground bounce light'],
+    ['Height Fog + Volumetric','Density / Falloff / Inscattering Color per weather. Extinction controls visibility distance'],
+    ['Practical Lights','Real lm/cd values. Inverse Squared Falloff = On. Use Temperature, not color picker'],
+    ['Reflections','Lumen quality settings. Place Reflection Captures as fallback layer'],
+    ['Post Process','Tone Mapper (ACES) / Bloom / Color Grading / Local Exposure for indoor-outdoor mix'],
+  ];
+  let h=`<p class="sub" style="margin-bottom:18px"><strong style="color:var(--t1)">Exposure first → Light sources → Atmosphere → Fog → Reflections → Post Process</strong></p>`;
+  steps.forEach((s,i)=>h+=`<div class="WS"><div class="WN">${i+1}</div><div class="WC"><h4>${s[0]}</h4><p>${s[1]}</p></div></div>`);
+  h+=`<div class="BX rd" style="margin-top:12px"><div class="BT rd">⚠️ Common Pitfalls</div>
+    <strong>1.</strong> 100k lux + default EV = pure white → set exposure FIRST<br>
+    <strong>2.</strong> Auto Exposure interferes → use Manual mode<br>
+    <strong>3.</strong> Lux values include sky contribution → DirLight should be slightly lower than reference total<br>
+    <strong>4.</strong> Moonlight 0.25 lux is too dark → artistically boost to 1–5 lux<br>
+    <strong>5.</strong> High Mie Scale can wash out DirLight color<br>
+    <strong>6.</strong> Volumetric Fog Albedo should be ≈ 1.0 for water particles — don't set too low</div>`;
+  h+=`<div class="BX bl" style="margin-top:14px"><div class="BT bl">🔗 Full Parameter Chain</div><div class="RT">
+    <strong>DirLight (Lux)</strong> → absolute brightness → determines EV100 choice<br>
+    <strong>EV100</strong> → perceived screen brightness → aperture / shutter / ISO<br>
+    <strong>SkyLight</strong> → shadow fill → ratio to DirLight = scene contrast<br>
+    <strong>Sky Atmosphere</strong> → Rayleigh = sky color / Mie = haze & scatter<br>
+    <strong>Height Fog</strong> → atmospheric density / Volumetric = directional light scatter<br>
+    <strong>Reflections</strong> → affected by all light sources / Roughness determines method + cost<br>
+    <strong style="color:var(--cyan)">Light → Exposure → Atmosphere → Fog → Reflections → Post Process = full chain</strong>
+  </div></div>`;
+  document.getElementById('flowC').innerHTML=h;
+}
+
+initTabs();buildBar();renderS();renderRefl();renderUnits();renderFormula();renderFlow();cEV();
+</script>
+</body>
+</html>
